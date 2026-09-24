@@ -24,8 +24,8 @@ export type Portal = {
 };
 
 /**
- * Role destinations. These pages are previews: sign-in and role checks are
- * not implemented yet, so nothing here grants or implies access.
+ * Role destinations. Each dashboard checks the signed-in user's role on the
+ * server; the coach and admin dashboards are still previews.
  */
 export const portals: readonly Portal[] = [
   {
@@ -79,10 +79,23 @@ export const portals: readonly Portal[] = [
 
 export type NavItem = { href: string; label: string };
 
-export const mainNav: readonly NavItem[] = [
-  { href: "/", label: "Home" },
-  ...portals.map(({ href, label }) => ({ href, label })),
-];
+/** What the header knows about the signed-in person (null when signed out). */
+export type HeaderAccount = { firstName: string; homeHref: string; accountHref: string | null };
+
+/** Header links. The primary action (sign in / sign out) is rendered separately. */
+export function navItemsFor(account: HeaderAccount | null): NavItem[] {
+  if (!account) {
+    return [
+      { href: "/", label: "Home" },
+      { href: "/signup", label: "Create account" },
+    ];
+  }
+  return [
+    { href: "/", label: "Home" },
+    { href: account.homeHref, label: "My dashboard" },
+    ...(account.accountHref ? [{ href: account.accountHref, label: "Account" }] : []),
+  ];
+}
 
 export const signInNavItem: NavItem = { href: "/login", label: "Sign in" };
 

@@ -62,3 +62,34 @@ jobs:
       # Supabase project.
       - run: npx supabase db start
       - run: npx supabase test db
+
+  parent-journey:
+    name: Parent journey (local Supabase)
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      PORT: "3000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Full local Supabase stack in Docker on the runner, including Auth and the
+      # Mailpit test mailbox. No hosted project and no real email is involved.
+      - run: npx supabase start
+      - name: Point the app at the local stack
+        run: |
+          eval "$(npx supabase status -o env)"
+          echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY:-$ANON_KEY}" >> "$GITHUB_ENV"
+          echo "MAILPIT_URL=${MAILPIT_URL:-${INBUCKET_URL:-http://127.0.0.1:54324}}" >> "$GITHUB_ENV"
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/parent-journey.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: parent-journey-report
+          path: playwright-report/
+          retention-days: 7

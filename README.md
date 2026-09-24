@@ -6,14 +6,14 @@ _Prepare. Develop. Compete._
 The product scope, roles, and safety requirements are defined in [`PROJECT_CHARTER.md`](./PROJECT_CHARTER.md),
 which is the source of truth for what gets built.
 
-## Current status: Sprint 0 (foundation)
+## Current status: Sprint 1 (parent onboarding)
 
-- Responsive, mobile-first app shell with PBP branding (placeholder colors)
-- Placeholder routes: `/`, `/login`, `/parent`, `/coach`, `/admin`
-- Database design as Supabase migrations with Row Level Security on every table, plus database tests. See
-  [`docs/database.md`](./docs/database.md).
-- **No sign-in or real data yet, and the app does not talk to the database.** The parent, coach, and admin
-  pages are clearly labelled previews and do not grant or imply access. Sign-in arrives in Sprint 1.
+- Parent sign-up with email confirmation; sign-in with a password or an emailed link; password reset
+- Parent dashboard, player profiles (add, view, edit), parent profile
+- Consent: Terms of Service and Privacy Policy at sign-up, parental consent per player, and a consent page
+  to review, give, or withdraw consent. **All legal wording is placeholder text marked for review.**
+- Database with Row Level Security on every table ([`docs/database.md`](./docs/database.md))
+- Coach and admin dashboards are still previews (Sprint 2+)
 
 ## Requirements
 
@@ -25,9 +25,17 @@ which is the source of truth for what gets built.
 
 ```bash
 npm ci                     # install exact dependency versions from package-lock.json
-cp .env.example .env.local # optional for now: no variables are used yet
+npm run db:start           # local Supabase in Docker (database, auth, test mailbox)
+cp .env.example .env.local # then fill in the values printed by `npx supabase status`
 npm run dev                # http://localhost:3000
 ```
+
+Emails sent by the local stack (sign-up confirmations, sign-in links, password resets) are caught by the
+test mailbox at http://127.0.0.1:54324; nothing is really sent. Without Supabase configured, public pages
+still work and sign-in shows a "not set up" notice.
+
+To connect a hosted Supabase project and Resend for email, follow
+[`docs/supabase-setup.md`](./docs/supabase-setup.md).
 
 ## Scripts
 
@@ -66,28 +74,38 @@ instead of installing one.
 
 - **Next.js App Router** (`src/app`) with **TypeScript strict mode**
 - **Tailwind CSS v4** — theme tokens are defined in CSS, not a `tailwind.config` file
-- **Server Components by default**; only interactive pieces (the mobile menu) are Client Components
-- **Supabase Postgres** with Row Level Security; schema changes are versioned SQL migrations in
-  `supabase/migrations`. Supabase Auth and Vercel deployment are planned but not connected yet.
+- **Server Components by default**; forms and the mobile menu are Client Components
+- **Supabase Auth + Postgres** via `@supabase/ssr`. The app uses only the public publishable key and acts as
+  the signed-in user, so Row Level Security applies to every query. The secret key is not used.
+- **Authorization**: `src/proxy.ts` refreshes the session and redirects signed-out visitors early; every
+  protected page and Server Action also checks the user and role on the server (`src/lib/auth/session.ts`).
+- **Forms**: Server Actions with Zod validation (`src/lib/validation`), shared by client and server.
 
 ```
 src/
   app/                 routes (one folder per URL) plus layout, loading, error, and 404 pages
     page.tsx           landing page            /
-    login/             sign-in placeholder     /login
-    parent/ coach/ admin/  role dashboard previews
     globals.css        Tailwind import and PBP brand color tokens
-  components/          shared UI: header/navigation, footer, notice, dashboard preview
-  config/site.ts       brand copy, role destinations, navigation helpers
-e2e/                   Playwright smoke tests
+    coach/ admin/      role dashboard previews (role-checked)
+    parent/            parent dashboard, players, consent, account (signed-in parents only)
+    login/ signup/ ... sign-in, sign-up, password reset, email check pages
+    auth/confirm/      landing point for links in emails
+    legal/             placeholder Terms, Privacy, Parental Consent (drafts)
+  components/          shared UI, forms, parent-area components
+  config/              brand copy and navigation, legal document versions, player options
+  lib/                 auth/session checks, Server Actions, Supabase clients, validation, consent logic
+  proxy.ts             session refresh and early sign-in redirects
+e2e/                   Playwright smoke tests and the full parent journey (needs local Supabase)
 supabase/
   config.toml          local Supabase settings (local development only)
   migrations/          versioned SQL migrations, applied in filename order
   tests/               pgTAP database tests (access rules and workflows)
   seed.sql             local-only seed data (placeholder assessment template)
+  templates/           auth email templates
 scripts/db/            running database tests without Docker
 docs/database.md       schema, access rules, workflow, open decisions
-.github/workflows/     CI: format, lint, typecheck, unit tests, Playwright, database tests
+docs/supabase-setup.md connecting a hosted Supabase project and Resend
+.github/workflows/     CI: checks, unit tests, Playwright, database tests, parent journey
 ```
 
 ## Branding
@@ -106,15 +124,15 @@ system font stack; no external fonts are loaded.
 All `.env*` files except `.env.example` are ignored by git — **never commit real credentials**. Variables
 prefixed `NEXT_PUBLIC_` are sent to the browser; secret keys must never use that prefix.
 
-Nothing reads these variables yet, and the app is not connected to a hosted Supabase project, Vercel, or any
-other external service. The local Supabase stack (`npm run db:start`) prints its own local-only keys; they
-are not needed until Sprint 1.
+The app reads only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and
+`NEXT_PUBLIC_SITE_URL`. The Supabase secret key is never used by the app.
 
 ## Continuous integration
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on pushes to `main`:
-format check, lint, typecheck, unit tests, the Playwright smoke tests, and the database tests (a local
-Supabase database started in Docker on the runner).
+format check, lint, typecheck, unit tests, the Playwright smoke tests, the database tests, and the full
+parent journey (sign-up, email confirmation, players, consent, password and email-link sign-in, password
+reset) against a local Supabase stack started in Docker on the runner.
 
 ## Contributing
 

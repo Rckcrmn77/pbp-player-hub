@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPortal, isActivePath, mainNav, portals, signInNavItem } from "./site";
+import { getPortal, isActivePath, navItemsFor, portals } from "./site";
 
 describe("isActivePath", () => {
   it("matches home only on the exact root path", () => {
@@ -19,22 +19,26 @@ describe("isActivePath", () => {
   });
 });
 
-describe("navigation config", () => {
+describe("navItemsFor", () => {
+  it("offers account creation to signed-out visitors", () => {
+    expect(navItemsFor(null).map((i) => i.href)).toEqual(["/", "/signup"]);
+  });
+
+  it("links a signed-in parent to their dashboard and account", () => {
+    const items = navItemsFor({ firstName: "Pat", homeHref: "/parent", accountHref: "/parent/account" });
+    expect(items.map((i) => i.href)).toEqual(["/", "/parent", "/parent/account"]);
+  });
+
+  it("omits the account link when there is none", () => {
+    const items = navItemsFor({ firstName: "Sam", homeHref: "/coach", accountHref: null });
+    expect(items.map((i) => i.href)).toEqual(["/", "/coach"]);
+  });
+});
+
+describe("portals", () => {
   it("defines one portal per role with matching routes", () => {
     expect(portals.map((p) => p.role)).toEqual(["parent", "coach", "admin"]);
-    for (const portal of portals) {
-      expect(portal.href).toBe(`/${portal.role}`);
-      expect(portal.plannedSections.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("has unique destinations including sign-in", () => {
-    const hrefs = [...mainNav, signInNavItem].map((item) => item.href);
-    expect(new Set(hrefs).size).toBe(hrefs.length);
-    expect(hrefs).toEqual(["/", "/parent", "/coach", "/admin", "/login"]);
-  });
-
-  it("looks up portals by role", () => {
+    for (const portal of portals) expect(portal.href).toBe(`/${portal.role}`);
     expect(getPortal("admin").label).toBe("Admin");
   });
 });

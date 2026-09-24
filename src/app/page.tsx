@@ -23,6 +23,20 @@ export default function HomePage() {
           they&apos;ve made.
         </p>
         <p className="mt-6 font-semibold text-white">{site.tagline}</p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/signup"
+            className="rounded-md bg-orange px-4 py-2.5 font-semibold text-white hover:bg-orange-dark"
+          >
+            Create a parent account
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-md border border-white/40 px-4 py-2.5 font-semibold text-white hover:bg-white/10"
+          >
+            Sign in
+          </Link>
+        </div>
       </section>
 
       <section aria-labelledby="journey-heading">
@@ -49,12 +63,14 @@ export default function HomePage() {
           {portals.map((portal) => (
             <li key={portal.role}>
               <Link
-                href={portal.href}
+                href={portal.role === "parent" ? "/signup" : "/login"}
                 className="flex h-full flex-col rounded-lg border border-navy/10 bg-white p-5 transition-colors hover:border-carolina focus-visible:border-carolina"
               >
                 <span className="text-lg font-semibold">{portal.audience}</span>
                 <span className="mt-2 text-sm text-navy/70">{portal.summary}</span>
-                <span className="mt-4 text-sm font-semibold text-carolina-dark">Preview dashboard →</span>
+                <span className="mt-4 text-sm font-semibold text-carolina-dark">
+                  {portal.role === "parent" ? "Create a parent account →" : "Staff sign in →"}
+                </span>
               </Link>
             </li>
           ))}

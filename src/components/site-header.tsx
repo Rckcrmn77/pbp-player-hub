@@ -4,11 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { isActivePath, mainNav, signInNavItem, site } from "@/config/site";
+import { isActivePath, navItemsFor, signInNavItem, site, type HeaderAccount } from "@/config/site";
+import { signOut } from "@/lib/actions/auth";
 
-export function SiteHeader() {
+export function SiteHeader({ account }: { account: HeaderAccount | null }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const items = navItemsFor(account);
+
+  // Highlight only the most specific matching link (e.g. "Account" rather than "My dashboard").
+  const activeHref = items
+    .filter((item) => isActivePath(pathname, item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <header className="bg-navy text-white">
@@ -29,18 +36,13 @@ export function SiteHeader() {
 
         <nav aria-label="Main" className="hidden md:block">
           <ul className="flex items-center gap-1">
-            {mainNav.map((item) => (
+            {items.map((item) => (
               <li key={item.href}>
-                <NavLink href={item.href} label={item.label} active={isActivePath(pathname, item.href)} />
+                <NavLink href={item.href} label={item.label} active={item.href === activeHref} />
               </li>
             ))}
-            <li>
-              <Link
-                href={signInNavItem.href}
-                className="ml-2 rounded-md bg-orange px-3 py-2 text-sm font-semibold hover:bg-orange-dark"
-              >
-                {signInNavItem.label}
-              </Link>
+            <li className="ml-2">
+              <PrimaryAction account={account} />
             </li>
           </ul>
         </nav>
@@ -69,21 +71,43 @@ export function SiteHeader() {
       {menuOpen && (
         <nav id="mobile-menu" aria-label="Mobile" className="border-t border-white/10 md:hidden">
           <ul className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-3">
-            {[...mainNav, signInNavItem].map((item) => (
+            {items.map((item) => (
               <li key={item.href}>
                 <NavLink
                   href={item.href}
                   label={item.label}
-                  active={isActivePath(pathname, item.href)}
+                  active={item.href === activeHref}
                   onNavigate={() => setMenuOpen(false)}
                   block
                 />
               </li>
             ))}
+            <li className="pt-2">
+              <PrimaryAction account={account} onNavigate={() => setMenuOpen(false)} />
+            </li>
           </ul>
         </nav>
       )}
     </header>
+  );
+}
+
+function PrimaryAction({ account, onNavigate }: { account: HeaderAccount | null; onNavigate?: () => void }) {
+  const className =
+    "inline-block rounded-md bg-orange px-3 py-2 text-sm font-semibold text-white hover:bg-orange-dark";
+  if (!account) {
+    return (
+      <Link href={signInNavItem.href} onClick={onNavigate} className={className}>
+        {signInNavItem.label}
+      </Link>
+    );
+  }
+  return (
+    <form action={signOut}>
+      <button type="submit" className={className}>
+        Sign out
+      </button>
+    </form>
   );
 }
 
