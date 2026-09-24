@@ -37,10 +37,12 @@ to stand in for the small part of Supabase the migrations use (the `auth.users` 
 | `..._access_helpers_and_workflow.sql` | Access helper functions, role protection, review workflow, audit triggers                        |
 | `..._row_level_security.sql`          | RLS on every table and all access policies                                                       |
 | `..._foreign_key_indexes.sql`         | An index for every foreign key                                                                   |
+| `..._staff_management.sql`            | Account email copy for admins; promotion to coach creates the coach record                       |
 
 ## Tables
 
-All 21 charter entities, plus `program_coaches` (which coaches are assigned to which program).
+All 21 charter entities, plus `program_coaches` (which coaches are assigned to which program) and
+`profile_emails` (each account's sign-in email, for administrators).
 
 ```mermaid
 erDiagram
@@ -100,6 +102,7 @@ Signed-out visitors have no access to any table. Anything not listed is denied.
 | `coach_notes`                                 | Read **parent-visible** notes for their players                      | Read all notes for coached players; write; edit/delete own      | All                          |
 | `progress_reports`                            | Read **published** for their players                                 | Same as assessments                                             | All; only admins publish     |
 | `audit_events`                                | —                                                                    | —                                                               | Read only                    |
+| `profile_emails`                              | Read own                                                             | Read own                                                        | Read all                     |
 
 ### Roles
 
@@ -107,6 +110,10 @@ Signed-out visitors have no access to any table. Anything not listed is denied.
   data, because the person signing up controls that data.
 - Only an administrator can change a role, and not their own (so PBP cannot lock itself out of admin access).
 - A coach also needs an active row in `coaches` and an assignment in `program_coaches` to see any players.
+- Promoting an account to coach or admin creates (or reactivates) its `coaches` row automatically.
+- Sign-in emails live in `auth.users`, which the app cannot read. A trigger copies each email into
+  `profile_emails`, readable only by the account itself and administrators, so coaches never see parents'
+  email addresses.
 
 ### Assessment and report workflow
 

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Notice } from "@/components/notice";
 import { AcceptAgreementsForm } from "@/components/parent/consent-forms";
-import { NoticeBanner } from "@/components/parent/notices";
+import { NoticeBanner } from "@/components/notice-banner";
 import { accountConsentTypes, legalDocuments, legalDocumentsAreDrafts } from "@/config/legal";
 import { changeConsent } from "@/lib/actions/parent";
 import { consentStatus, hasAccountConsent, type ConsentEntry } from "@/lib/consent";

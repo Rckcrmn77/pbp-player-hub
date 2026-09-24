@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPortal, isActivePath, navItemsFor, portals } from "./site";
+import { isActivePath, navItemsFor, portals } from "./site";
 
 describe("isActivePath", () => {
   it("matches home only on the exact root path", () => {
@@ -39,6 +39,5 @@ describe("portals", () => {
   it("defines one portal per role with matching routes", () => {
     expect(portals.map((p) => p.role)).toEqual(["parent", "coach", "admin"]);
     for (const portal of portals) expect(portal.href).toBe(`/${portal.role}`);
-    expect(getPortal("admin").label).toBe("Admin");
   });
 });

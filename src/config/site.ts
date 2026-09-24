@@ -19,13 +19,11 @@ export type Portal = {
   label: string;
   audience: string;
   summary: string;
-  /** Planned dashboard sections from the project charter (section 4.10). */
-  plannedSections: readonly string[];
 };
 
 /**
- * Role destinations. Each dashboard checks the signed-in user's role on the
- * server; the coach and admin dashboards are still previews.
+ * Role destinations shown on the home page. Each dashboard checks the
+ * signed-in user's role on the server.
  */
 export const portals: readonly Portal[] = [
   {
@@ -34,15 +32,6 @@ export const portals: readonly Portal[] = [
     label: "Parents",
     audience: "Parents and guardians",
     summary: "Follow your player's Blueprint, weekly work, and coach-approved progress reports.",
-    plannedSections: [
-      "Player cards",
-      "Upcoming sessions",
-      "Current Blueprint",
-      "Weekly assignments",
-      "Check-in status",
-      "Latest published report",
-      "Register or book the next session",
-    ],
   },
   {
     role: "coach",
@@ -50,14 +39,6 @@ export const portals: readonly Portal[] = [
     label: "Coaches",
     audience: "PBP coaches",
     summary: "Take attendance, complete assessments, assign drills, and approve reports.",
-    plannedSections: [
-      "Today's sessions",
-      "Assigned roster",
-      "Missing assessments",
-      "Missing check-ins",
-      "Attendance entry",
-      "Assessment and report approval queue",
-    ],
   },
   {
     role: "admin",
@@ -65,15 +46,6 @@ export const portals: readonly Portal[] = [
     label: "Admin",
     audience: "PBP administrators",
     summary: "Manage programs, rosters, coaches, the drill library, and report publication.",
-    plannedSections: [
-      "Users and roles",
-      "Players",
-      "Programs and rosters",
-      "Coaches",
-      "Drill library",
-      "Assessment templates",
-      "Report publication",
-    ],
   },
 ];
 
@@ -103,10 +75,4 @@ export const signInNavItem: NavItem = { href: "/login", label: "Sign in" };
 export function isActivePath(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-export function getPortal(role: Role): Portal {
-  const portal = portals.find((p) => p.role === role);
-  if (!portal) throw new Error(`Unknown role: ${role}`);
-  return portal;
 }

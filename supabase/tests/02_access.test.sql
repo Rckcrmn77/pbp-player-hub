@@ -22,7 +22,8 @@ begin
   values (p_id, p_id::text || '@example.test', p_metadata);
   update public.profiles set role = p_role where id = p_id;
   if p_role in ('coach', 'admin') then
-    insert into public.coaches (profile_id) values (p_id);
+    -- Promotion already creates the coach record (see the staff management migration).
+    insert into public.coaches (profile_id) values (p_id) on conflict (profile_id) do nothing;
   end if;
 end;
 $$;

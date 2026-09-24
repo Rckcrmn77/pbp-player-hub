@@ -13,10 +13,12 @@ import type { Database } from "./types";
  * Returns null when Supabase is not configured.
  */
 export async function createClient() {
+  // Read cookies first, even when Supabase is not configured, so pages that
+  // depend on the signed-in user are always rendered per request.
+  const cookieStore = await cookies();
   const config = getSupabaseConfig();
   if (!config) return null;
 
-  const cookieStore = await cookies();
   return createServerClient<Database>(config.url, config.publishableKey, {
     cookies: {
       getAll() {

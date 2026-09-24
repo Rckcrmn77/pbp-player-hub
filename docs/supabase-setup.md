@@ -44,6 +44,20 @@ With `SUPABASE_ACCESS_TOKEN` set, Claude applies `supabase/migrations/*.sql` in 
 Management API and confirms the result. Without it, paste each migration file in order into the dashboard's
 **SQL Editor** and run it. Do not run `supabase/seed.sql` on a hosted project; it is for local development.
 
+## 3b. Create the first administrator (owner)
+
+Nobody can make themselves an admin in the app. After the migrations are applied:
+
+1. Sign up in the app with your own email address and confirm it.
+2. In the Supabase dashboard **SQL Editor**, run (with your email):
+
+   ```sql
+   update public.profiles set role = 'admin'
+   where id = (select id from auth.users where email = 'you@example.com');
+   ```
+
+3. Sign out and back in. From then on, admins promote coaches on the app's **Admin → People** page.
+
 ## 4. Auth settings (dashboard: Authentication)
 
 | Setting                                  | Value                                                    |
