@@ -109,7 +109,7 @@ export default async function AssessmentPage({ params, searchParams }: PageProps
                 <StatusButton id={id} status="draft" label="Return to draft" className={secondary} />
               </>
             )}
-            {assessment.status === "approved" && !isAdmin && (
+            {assessment.status === "approved" && !isAdmin && notice !== "assessment-approved" && (
               <p className="text-sm text-navy/70">Approved. An administrator publishes it to the family.</p>
             )}
             {assessment.status === "draft" && !editable && (
