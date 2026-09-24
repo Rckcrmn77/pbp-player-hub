@@ -6,17 +6,20 @@ _Prepare. Develop. Compete._
 The product scope, roles, and safety requirements are defined in [`PROJECT_CHARTER.md`](./PROJECT_CHARTER.md),
 which is the source of truth for what gets built.
 
-## Current status: Sprint 0a (application shell)
+## Current status: Sprint 0 (foundation)
 
 - Responsive, mobile-first app shell with PBP branding (placeholder colors)
 - Placeholder routes: `/`, `/login`, `/parent`, `/coach`, `/admin`
-- **No sign-in, database, or real data yet.** The parent, coach, and admin pages are clearly labelled
-  previews and do not grant or imply access. Authentication and Row Level Security arrive in later sprints.
+- Database design as Supabase migrations with Row Level Security on every table, plus database tests. See
+  [`docs/database.md`](./docs/database.md).
+- **No sign-in or real data yet, and the app does not talk to the database.** The parent, coach, and admin
+  pages are clearly labelled previews and do not grant or imply access. Sign-in arrives in Sprint 1.
 
 ## Requirements
 
 - Node.js 22 or newer (see `.nvmrc`)
 - npm (the project's package manager — use `npm ci`, not yarn/pnpm)
+- Docker, for the local Supabase database (only needed for database work)
 
 ## Getting started
 
@@ -28,19 +31,24 @@ npm run dev                # http://localhost:3000
 
 ## Scripts
 
-| Command                | What it does                                                            |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `npm run dev`          | Start the development server                                            |
-| `npm run build`        | Create a production build                                               |
-| `npm run start`        | Serve the production build (run `build` first)                          |
-| `npm run lint`         | ESLint (Next.js + TypeScript rules)                                     |
-| `npm run typecheck`    | Generate Next.js route types and run `tsc --noEmit` (strict mode)       |
-| `npm run format`       | Format all files with Prettier                                          |
-| `npm run format:check` | Check formatting without writing                                        |
-| `npm test`             | Unit tests (Vitest + React Testing Library)                             |
-| `npm run test:watch`   | Unit tests in watch mode                                                |
-| `npm run test:e2e`     | Playwright smoke tests (desktop + mobile) against a production build    |
-| `npm run check`        | Format check, lint, typecheck, and unit tests — run this before pushing |
+| Command                     | What it does                                                            |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `npm run dev`               | Start the development server                                            |
+| `npm run build`             | Create a production build                                               |
+| `npm run start`             | Serve the production build (run `build` first)                          |
+| `npm run lint`              | ESLint (Next.js + TypeScript rules)                                     |
+| `npm run typecheck`         | Generate Next.js route types and run `tsc --noEmit` (strict mode)       |
+| `npm run format`            | Format all files with Prettier                                          |
+| `npm run format:check`      | Check formatting without writing                                        |
+| `npm test`                  | Unit tests (Vitest + React Testing Library)                             |
+| `npm run test:watch`        | Unit tests in watch mode                                                |
+| `npm run test:e2e`          | Playwright smoke tests (desktop + mobile) against a production build    |
+| `npm run check`             | Format check, lint, typecheck, and unit tests — run this before pushing |
+| `npm run db:start`          | Start the local Supabase stack in Docker (applies migrations and seed)  |
+| `npm run db:test`           | Run the database access tests (pgTAP) against the local stack           |
+| `npm run db:reset`          | Rebuild the local database from migrations and seed                     |
+| `npm run db:stop`           | Stop the local Supabase stack                                           |
+| `npm run db:test:no-docker` | Run the database tests on plain PostgreSQL (see `docs/database.md`)     |
 
 ### End-to-end tests
 
@@ -59,7 +67,8 @@ instead of installing one.
 - **Next.js App Router** (`src/app`) with **TypeScript strict mode**
 - **Tailwind CSS v4** — theme tokens are defined in CSS, not a `tailwind.config` file
 - **Server Components by default**; only interactive pieces (the mobile menu) are Client Components
-- Planned (not yet added): Supabase Auth + Postgres with Row Level Security, deployed on Vercel
+- **Supabase Postgres** with Row Level Security; schema changes are versioned SQL migrations in
+  `supabase/migrations`. Supabase Auth and Vercel deployment are planned but not connected yet.
 
 ```
 src/
@@ -71,7 +80,14 @@ src/
   components/          shared UI: header/navigation, footer, notice, dashboard preview
   config/site.ts       brand copy, role destinations, navigation helpers
 e2e/                   Playwright smoke tests
-.github/workflows/     CI: format, lint, typecheck, unit tests, Playwright
+supabase/
+  config.toml          local Supabase settings (local development only)
+  migrations/          versioned SQL migrations, applied in filename order
+  tests/               pgTAP database tests (access rules and workflows)
+  seed.sql             local-only seed data (placeholder assessment template)
+scripts/db/            running database tests without Docker
+docs/database.md       schema, access rules, workflow, open decisions
+.github/workflows/     CI: format, lint, typecheck, unit tests, Playwright, database tests
 ```
 
 ## Branding
@@ -90,16 +106,18 @@ system font stack; no external fonts are loaded.
 All `.env*` files except `.env.example` are ignored by git — **never commit real credentials**. Variables
 prefixed `NEXT_PUBLIC_` are sent to the browser; secret keys must never use that prefix.
 
-Nothing in Sprint 0a reads these variables yet, and the app is not connected to Supabase, Vercel, or any
-other external service.
+Nothing reads these variables yet, and the app is not connected to a hosted Supabase project, Vercel, or any
+other external service. The local Supabase stack (`npm run db:start`) prints its own local-only keys; they
+are not needed until Sprint 1.
 
 ## Continuous integration
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on pushes to `main`:
-format check, lint, typecheck, unit tests, and the Playwright smoke tests.
+format check, lint, typecheck, unit tests, the Playwright smoke tests, and the database tests (a local
+Supabase database started in Docker on the runner).
 
 ## Contributing
 
 Work happens on feature branches and lands on `main` through pull requests reviewed by the project manager.
 A change is done when it meets the charter's definition of done (section 10), including `npm run check`
-and `npm run test:e2e` passing.
+and `npm run test:e2e` passing, and `npm run db:test` for database changes.

@@ -46,3 +46,19 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  database:
+    name: Database migrations and access tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Starts a local Supabase database in Docker on the runner and applies
+      # supabase/migrations and supabase/seed.sql. Nothing connects to a hosted
+      # Supabase project.
+      - run: npx supabase db start
+      - run: npx supabase test db
