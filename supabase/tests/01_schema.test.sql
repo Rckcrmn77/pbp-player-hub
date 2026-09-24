@@ -7,8 +7,8 @@ select plan(12);
 
 select is(
   (select count(*) from pg_tables where schemaname = 'public'),
-  22::bigint,
-  'the public schema has the 22 expected tables'
+  23::bigint,
+  'the public schema has the 23 expected tables'
 );
 
 select is(

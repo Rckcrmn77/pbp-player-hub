@@ -63,8 +63,8 @@ jobs:
       - run: npx supabase db start
       - run: npx supabase test db
 
-  parent-journey:
-    name: Parent journey (local Supabase)
+  journeys:
+    name: User journeys (local Supabase)
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -85,11 +85,13 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY:-$ANON_KEY}" >> "$GITHUB_ENV"
           echo "MAILPIT_URL=${MAILPIT_URL:-${INBUCKET_URL:-http://127.0.0.1:54324}}" >> "$GITHUB_ENV"
+          # Local database only: the staff journey uses it to create the first admin.
+          echo "SUPABASE_DB_URL=${DB_URL}" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test e2e/parent-journey.spec.ts
+      - run: npx playwright test e2e/parent-journey.spec.ts e2e/staff-journey.spec.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: parent-journey-report
+          name: journeys-report
           path: playwright-report/
           retention-days: 7

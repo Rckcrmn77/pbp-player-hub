@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
+import { password, signOut, signUpAndConfirm, uniqueEmail } from "./support/accounts";
 import { latestEmailLink } from "./support/mailbox";
 
 /**
@@ -9,38 +10,6 @@ import { latestEmailLink } from "./support/mailbox";
  */
 test.skip(!process.env.NEXT_PUBLIC_SUPABASE_URL, "needs a Supabase stack (see README: npm run db:start)");
 test.describe.configure({ mode: "serial" });
-
-const password = "correct-horse-battery";
-
-function uniqueEmail(label: string, project: string) {
-  return `e2e-${label}-${project}-${Date.now()}@example.test`;
-}
-
-async function openMenuIfMobile(page: Page, isMobile: boolean) {
-  if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
-}
-
-async function signUpAndConfirm(page: Page, email: string, firstName: string) {
-  const startedAt = new Date();
-  await page.goto("/signup");
-  await page.getByLabel("First name").fill(firstName);
-  await page.getByLabel("Last name").fill("Tester");
-  await page.getByRole("textbox", { name: "Email" }).fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByLabel(/I am a parent or legal guardian/).check();
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Check your email");
-
-  const link = await latestEmailLink(email, /Confirm your PBP Player Hub account/, startedAt);
-  await page.goto(link);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Welcome, ${firstName}`);
-}
-
-async function signOut(page: Page, isMobile: boolean) {
-  await openMenuIfMobile(page, isMobile);
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Prepare. Develop. Compete.");
-}
 
 test("a parent signs up, adds and edits a player, manages consent, and signs back in", async ({
   page,

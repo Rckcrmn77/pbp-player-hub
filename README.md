@@ -6,14 +6,15 @@ _Prepare. Develop. Compete._
 The product scope, roles, and safety requirements are defined in [`PROJECT_CHARTER.md`](./PROJECT_CHARTER.md),
 which is the source of truth for what gets built.
 
-## Current status: Sprint 1 (parent onboarding)
+## Current status: Sprint 2 (programs and coach workflow)
 
-- Parent sign-up with email confirmation; sign-in with a password or an emailed link; password reset
-- Parent dashboard, player profiles (add, view, edit), parent profile
-- Consent: Terms of Service and Privacy Policy at sign-up, parental consent per player, and a consent page
-  to review, give, or withdraw consent. **All legal wording is placeholder text marked for review.**
+- **Parents**: sign-up with email confirmation, sign-in by password or emailed link, dashboard, player
+  profiles, consent, upcoming sessions, attendance summary, and programs open for registration
+- **Admins**: programs, weekly session scheduling, coach assignments, rosters, and roles (People page)
+- **Coaches**: today's and upcoming sessions, rosters, and attendance entry
 - Database with Row Level Security on every table ([`docs/database.md`](./docs/database.md))
-- Coach and admin dashboards are still previews (Sprint 2+)
+- **All legal wording is placeholder text marked for review.** Assessments, Blueprints, check-ins, and
+  reports come in Sprints 3–4.
 
 ## Requirements
 
@@ -86,7 +87,8 @@ src/
   app/                 routes (one folder per URL) plus layout, loading, error, and 404 pages
     page.tsx           landing page            /
     globals.css        Tailwind import and PBP brand color tokens
-    coach/ admin/      role dashboard previews (role-checked)
+    admin/             programs, sessions, coach assignments, rosters, people (admins only)
+    coach/             coach dashboard, rosters, attendance (coaches and admins)
     parent/            parent dashboard, players, consent, account (signed-in parents only)
     login/ signup/ ... sign-in, sign-up, password reset, email check pages
     auth/confirm/      landing point for links in emails
@@ -95,7 +97,7 @@ src/
   config/              brand copy and navigation, legal document versions, player options
   lib/                 auth/session checks, Server Actions, Supabase clients, validation, consent logic
   proxy.ts             session refresh and early sign-in redirects
-e2e/                   Playwright smoke tests and the full parent journey (needs local Supabase)
+e2e/                   Playwright smoke tests, parent journey, and staff journey (need local Supabase)
 supabase/
   config.toml          local Supabase settings (local development only)
   migrations/          versioned SQL migrations, applied in filename order
@@ -131,8 +133,9 @@ The app reads only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on pushes to `main`:
 format check, lint, typecheck, unit tests, the Playwright smoke tests, the database tests, and the full
-parent journey (sign-up, email confirmation, players, consent, password and email-link sign-in, password
-reset) against a local Supabase stack started in Docker on the runner.
+parent and staff journeys (sign-up, email confirmation, players, consent, sign-in, password reset; programs,
+sessions, coach assignment, rosters, attendance) against a local Supabase stack started in Docker on the
+runner.
 
 ## Contributing
 

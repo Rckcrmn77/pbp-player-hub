@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { NoticeBanner } from "@/components/parent/notices";
+import { NoticeBanner } from "@/components/notice-banner";
 import {
   ageGroupOptions,
   experienceOptions,
@@ -11,7 +11,13 @@ import {
   programOptions,
 } from "@/config/player-options";
 import { consentStatus } from "@/lib/consent";
-import { getMyConsentRecords, getMyPlayer } from "@/lib/data/parent";
+import { attendanceOptions, enrollmentStatusOptions } from "@/config/program-options";
+import {
+  getAttendanceSummary,
+  getMyConsentRecords,
+  getMyPlayer,
+  getMyPlayerPrograms,
+} from "@/lib/data/parent";
 
 export const metadata: Metadata = { title: "Player profile" };
 
@@ -26,8 +32,15 @@ function Detail({ label, value }: { label: string; value: string | number | null
 
 export default async function PlayerPage({ params, searchParams }: PageProps<"/parent/players/[id]">) {
   const [{ id }, { notice }] = await Promise.all([params, searchParams]);
-  const [player, consents] = await Promise.all([getMyPlayer(id), getMyConsentRecords()]);
+  const [player, consents, allPrograms] = await Promise.all([
+    getMyPlayer(id),
+    getMyConsentRecords(),
+    getMyPlayerPrograms(),
+  ]);
   if (!player) notFound();
+  const programs = allPrograms.filter((p) => p.playerId === player.id);
+  const attendance = await getAttendanceSummary(player.id);
+  const sessionsRecorded = Object.values(attendance).reduce((a, b) => a + b, 0);
   const consent = consentStatus(consents, "parental_consent", player.id);
 
   return (
@@ -78,6 +91,41 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
           <Detail label="Strengths" value={player.strengths} />
           <Detail label="Areas to improve" value={player.improvement_areas} />
         </dl>
+      </section>
+
+      <section className="rounded-xl border border-navy/10 bg-white p-5">
+        <h2 className="mb-4 text-lg font-semibold">PBP programs and attendance</h2>
+        {programs.length === 0 ? (
+          <p className="text-sm text-navy/70">
+            Not on a program roster yet. PBP adds players to rosters after registration.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-1">
+              {programs.map((p) => (
+                <li key={p.enrollmentId}>
+                  <span className="font-medium">{p.programName}</span>
+                  <span className="text-navy/60">
+                    {" "}
+                    · {enrollmentStatusOptions.find((o) => o.value === p.status)?.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {sessionsRecorded === 0 ? (
+              <p className="text-sm text-navy/70">No attendance recorded yet.</p>
+            ) : (
+              <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {attendanceOptions.map((o) => (
+                  <div key={o.value} className="rounded-lg bg-surface p-3">
+                    <dt className="text-sm text-navy/60">{o.label}</dt>
+                    <dd className="text-2xl font-bold tabular-nums">{attendance[o.value]}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="rounded-xl border border-navy/10 bg-white p-5">
