@@ -1,27 +1,48 @@
 import { expect, test } from "@playwright/test";
 
-test("landing page shows PBP branding and role destinations", async ({ page }) => {
+test("landing page shows PBP branding and ways in", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("PBP Player Hub");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Prepare. Develop. Compete.");
-  await expect(page.getByRole("link", { name: /Parents and guardians/ })).toHaveAttribute("href", "/parent");
-  await expect(page.getByRole("link", { name: /PBP coaches/ })).toHaveAttribute("href", "/coach");
-  await expect(page.getByRole("link", { name: /PBP administrators/ })).toHaveAttribute("href", "/admin");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("link", { name: "Create a parent account" }).first()).toHaveAttribute(
+    "href",
+    "/signup",
+  );
+  await expect(main.getByRole("link", { name: /PBP coaches/ })).toHaveAttribute("href", "/login");
 });
 
-const routes = [
+const publicRoutes = [
   { path: "/", heading: "Prepare. Develop. Compete." },
   { path: "/login", heading: "Sign in" },
-  { path: "/parent", heading: "Parents dashboard" },
-  { path: "/coach", heading: "Coaches dashboard" },
-  { path: "/admin", heading: "Admin dashboard" },
+  { path: "/signup", heading: "Create a parent account" },
+  { path: "/forgot-password", heading: "Reset your password" },
+  { path: "/check-email?for=signup", heading: "Check your email" },
+  { path: "/legal/terms", heading: "Terms of Service" },
+  { path: "/legal/privacy", heading: "Privacy Policy" },
+  { path: "/legal/parental-consent", heading: "Parental Consent" },
 ];
 
-for (const { path, heading } of routes) {
+for (const { path, heading } of publicRoutes) {
   test(`${path} responds and renders`, async ({ page }) => {
     const response = await page.goto(path);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
+  });
+}
+
+test("legal pages are clearly marked as drafts", async ({ page }) => {
+  await page.goto("/legal/privacy");
+  await expect(page.getByText("Draft placeholder: not for use with real families")).toBeVisible();
+});
+
+for (const path of ["/parent", "/parent/players/new", "/coach", "/admin"]) {
+  test(`${path} sends signed-out visitors to sign in`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in");
+    const url = new URL(page.url());
+    expect(url.pathname).toBe("/login");
+    expect(url.searchParams.get("next")).toBe(path);
   });
 }
 
@@ -31,12 +52,10 @@ test("unknown routes show the not-found page", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
 });
 
-test("navigation reaches every destination", async ({ page, isMobile }) => {
+test("navigation reaches sign-up and sign-in", async ({ page, isMobile }) => {
   await page.goto("/");
   for (const [name, heading] of [
-    ["Parents", "Parents dashboard"],
-    ["Coaches", "Coaches dashboard"],
-    ["Admin", "Admin dashboard"],
+    ["Create account", "Create a parent account"],
     ["Sign in", "Sign in"],
   ]) {
     if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
@@ -46,8 +65,16 @@ test("navigation reaches every destination", async ({ page, isMobile }) => {
   }
 });
 
+test("sign-up form explains what is missing", async ({ page }) => {
+  await page.goto("/signup");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByText("Enter your first name.")).toBeVisible();
+  await expect(page.getByText("Enter a valid email address.")).toBeVisible();
+  await expect(page.getByText("You need to accept the Terms of Service and Privacy Policy.")).toBeVisible();
+});
+
 test("pages do not scroll horizontally", async ({ page }) => {
-  for (const { path } of routes) {
+  for (const { path } of publicRoutes) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

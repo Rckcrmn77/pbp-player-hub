@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { site } from "@/config/site";
+import { site, type HeaderAccount } from "@/config/site";
+import { getSessionUser, homePathFor } from "@/lib/auth/session";
 
 import "./globals.css";
 
@@ -15,7 +16,16 @@ export const viewport: Viewport = {
   themeColor: "#0b1f3a",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const user = await getSessionUser();
+  const account: HeaderAccount | null = user
+    ? {
+        firstName: user.profile.first_name,
+        homeHref: homePathFor(user.profile.role),
+        accountHref: user.profile.role === "parent" ? "/parent/account" : null,
+      }
+    : null;
+
   return (
     <html lang="en" className="h-full">
       <body className="flex min-h-full flex-col">
@@ -25,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <SiteHeader />
+        <SiteHeader account={account} />
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">
           {children}
         </main>

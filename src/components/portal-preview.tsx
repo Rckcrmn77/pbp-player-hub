@@ -1,12 +1,9 @@
-import Link from "next/link";
-
 import { Notice } from "@/components/notice";
 import { getPortal, type Role } from "@/config/site";
 
 /**
  * Placeholder dashboard for a role. It lists the sections planned for that
- * dashboard and shows no data: sign-in and server-side role checks arrive in
- * a later sprint, and until then this page must not look like a working portal.
+ * dashboard and shows no data. The page using it checks the role on the server.
  */
 export function PortalPreview({ role }: { role: Role }) {
   const portal = getPortal(role);
@@ -19,12 +16,8 @@ export function PortalPreview({ role }: { role: Role }) {
         <p className="mt-2 max-w-2xl text-navy/80">{portal.summary}</p>
       </div>
 
-      <Notice title="Preview only — sign-in is not available yet">
-        This page is a placeholder. Accounts, sign-in, and role-based access will be added in an upcoming
-        release, and no player or family information is shown here.{" "}
-        <Link href="/login" className="font-medium text-carolina-dark underline">
-          About sign-in
-        </Link>
+      <Notice title="Preview: this dashboard is still being built">
+        The tools below are planned for upcoming releases. No player or family information is shown here yet.
       </Notice>
 
       <section aria-labelledby={`${role}-planned`}>
