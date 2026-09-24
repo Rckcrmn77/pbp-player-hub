@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/*
+ * PBP brand colors — PLACEHOLDER VALUES.
+ *
+ * These are approximations of the approved palette (deep navy, burnt orange,
+ * Carolina blue, white) until final brand hex codes are supplied. Change them
+ * here and every page picks up the new values; components only use the token
+ * names (e.g. `bg-navy`, `text-orange`), never raw hex codes.
+ *
+ * Contrast notes (WCAG AA needs 4.5:1 for normal text):
+ *   navy on white        16.5:1
+ *   white on orange       5.0:1  (buttons)
+ *   carolina-dark on white 5.4:1 (links and text on light backgrounds)
+ *   carolina on navy      5.5:1  (accents on dark backgrounds)
+ *   carolina on white     3.0:1  — decorative use only, never for text
+ */
+@theme {
+  --color-navy: #0b1f3a;
+  --color-navy-light: #16335c;
+  --color-orange: #b8501a;
+  --color-orange-dark: #97410f;
+  --color-carolina: #4b9cd3;
+  --color-carolina-dark: #2f6f9f;
+  --color-carolina-light: #e8f2fa;
+  --color-surface: #f6f8fb;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  @apply bg-surface text-navy antialiased;
+}
