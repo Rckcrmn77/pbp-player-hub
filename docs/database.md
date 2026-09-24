@@ -38,6 +38,7 @@ to stand in for the small part of Supabase the migrations use (the `auth.users` 
 | `..._row_level_security.sql`          | RLS on every table and all access policies                                                       |
 | `..._foreign_key_indexes.sql`         | An index for every foreign key                                                                   |
 | `..._staff_management.sql`            | Account email copy for admins; promotion to coach creates the coach record                       |
+| `..._assigned_drill_visibility.sql`   | Families can read drills assigned in their visible Blueprints, even retired ones                 |
 
 ## Tables
 
@@ -111,6 +112,8 @@ Signed-out visitors have no access to any table. Anything not listed is denied.
 - Only an administrator can change a role, and not their own (so PBP cannot lock itself out of admin access).
 - A coach also needs an active row in `coaches` and an assignment in `program_coaches` to see any players.
 - Promoting an account to coach or admin creates (or reactivates) its `coaches` row automatically.
+- Retired drills (`is_active = false`) disappear from the library for families, but a drill assigned in a
+  Blueprint the family can see stays readable.
 - Sign-in emails live in `auth.users`, which the app cannot read. A trigger copies each email into
   `profile_emails`, readable only by the account itself and administrators, so coaches never see parents'
   email addresses.

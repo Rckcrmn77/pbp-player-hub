@@ -51,9 +51,12 @@ export default async function CoachProgramPage({ params }: PageProps<"/coach/pro
                 className="flex flex-col gap-1 rounded-xl border border-navy/10 bg-white p-4"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="font-semibold">
+                  <Link
+                    href={`/coach/players/${player.id}`}
+                    className="font-semibold text-carolina-dark underline"
+                  >
                     {player.first_name} {player.last_name}
-                  </p>
+                  </Link>
                   <StatusPill tone={onRosterStatuses.includes(status) ? "good" : "warn"}>
                     {enrollmentStatusOptions.find((o) => o.value === status)?.label}
                   </StatusPill>

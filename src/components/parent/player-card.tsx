@@ -3,17 +3,19 @@ import Link from "next/link";
 import { ageGroupOptions, labelFor, positionOptions, programOptions } from "@/config/player-options";
 import { enrollmentStatusOptions } from "@/config/program-options";
 import type { ConsentStatus } from "@/lib/consent";
-import type { PlayerProgram } from "@/lib/data/parent";
+import type { BlueprintSummary, PlayerProgram } from "@/lib/data/parent";
 import type { PlayerRow } from "@/lib/supabase/types";
 
 export function PlayerCard({
   player,
   consent,
   programs = [],
+  blueprint,
 }: {
   player: PlayerRow;
   consent: ConsentStatus;
   programs?: PlayerProgram[];
+  blueprint?: BlueprintSummary;
 }) {
   return (
     <article className="flex h-full flex-col gap-3 rounded-xl border border-navy/10 bg-white p-5">
@@ -43,6 +45,15 @@ export function PlayerCard({
             </li>
           ))}
         </ul>
+      )}
+      {blueprint && (
+        <div className="rounded-md bg-carolina-light px-3 py-2 text-sm">
+          <p className="font-semibold">Blueprint active</p>
+          {blueprint.topPriority && <p>Top priority: {blueprint.topPriority}</p>}
+          <p className="text-navy/70">
+            {blueprint.drillCount} drill{blueprint.drillCount === 1 ? "" : "s"} assigned
+          </p>
+        </div>
       )}
       {consent !== "granted" && (
         <p className="rounded-md bg-orange/10 px-3 py-2 text-sm font-medium text-orange-dark">

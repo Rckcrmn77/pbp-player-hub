@@ -62,3 +62,17 @@ export async function makeAdmin(email: string) {
     await client.end();
   }
 }
+
+/** Runs SQL against the local test database (fixtures only; never a hosted database). */
+export async function sql<T extends Record<string, unknown> = Record<string, unknown>>(
+  text: string,
+  params: unknown[] = [],
+): Promise<T[]> {
+  const client = new Client({ connectionString: process.env.SUPABASE_DB_URL });
+  await client.connect();
+  try {
+    return (await client.query(text, params)).rows as T[];
+  } finally {
+    await client.end();
+  }
+}

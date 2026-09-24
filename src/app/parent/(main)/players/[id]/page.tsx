@@ -11,7 +11,12 @@ import {
   programOptions,
 } from "@/config/player-options";
 import { consentStatus } from "@/lib/consent";
+import { AssessmentResults } from "@/components/assessment/assessment-results";
+import { BlueprintView } from "@/components/assessment/blueprint-view";
+import { assessmentTypeLabels } from "@/config/assessment";
 import { attendanceOptions, enrollmentStatusOptions } from "@/config/program-options";
+import { getActiveBlueprint, getAssessmentDetail, listPlayerAssessments } from "@/lib/data/assessments";
+import { formatDate } from "@/lib/time";
 import {
   getAttendanceSummary,
   getMyConsentRecords,
@@ -39,7 +44,15 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
   ]);
   if (!player) notFound();
   const programs = allPrograms.filter((p) => p.playerId === player.id);
-  const attendance = await getAttendanceSummary(player.id);
+  const [attendance, blueprint, published] = await Promise.all([
+    getAttendanceSummary(player.id),
+    getActiveBlueprint(player.id),
+    listPlayerAssessments(player.id),
+  ]);
+  // Row Level Security returns only published assessments to families.
+  const assessments = (await Promise.all(published.map((a) => getAssessmentDetail(a.id)))).filter(
+    (d) => d !== null,
+  );
   const sessionsRecorded = Object.values(attendance).reduce((a, b) => a + b, 0);
   const consent = consentStatus(consents, "parental_consent", player.id);
 
@@ -91,6 +104,48 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
           <Detail label="Strengths" value={player.strengths} />
           <Detail label="Areas to improve" value={player.improvement_areas} />
         </dl>
+      </section>
+
+      <section aria-labelledby="blueprint-heading" className="flex flex-col gap-3">
+        <h2 id="blueprint-heading" className="text-xl font-semibold">
+          Current Blueprint
+        </h2>
+        {blueprint ? (
+          <BlueprintView detail={blueprint} />
+        ) : (
+          <p className="rounded-xl border border-dashed border-navy/20 bg-white p-4 text-sm text-navy/70">
+            No active Blueprint yet. After the baseline assessment, the coach builds a plan with priorities
+            and drills.
+          </p>
+        )}
+      </section>
+
+      <section aria-labelledby="assessments-heading" className="flex flex-col gap-3">
+        <h2 id="assessments-heading" className="text-xl font-semibold">
+          Assessments
+        </h2>
+        {assessments.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-navy/20 bg-white p-4 text-sm text-navy/70">
+            No assessments shared yet. You&apos;ll see each assessment here once the coach&apos;s review is
+            complete.
+          </p>
+        ) : (
+          assessments.map((detail, i) => (
+            <details
+              key={detail.assessment.id}
+              open={i === 0}
+              className="rounded-xl border border-navy/10 bg-surface p-4"
+            >
+              <summary className="cursor-pointer font-semibold">
+                {assessmentTypeLabels[detail.assessment.assessment_type]} assessment ·{" "}
+                {formatDate(detail.assessment.assessed_on)} · {detail.coachName}
+              </summary>
+              <div className="mt-4">
+                <AssessmentResults detail={detail} />
+              </div>
+            </details>
+          ))
+        )}
       </section>
 
       <section className="rounded-xl border border-navy/10 bg-white p-5">

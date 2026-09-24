@@ -140,3 +140,32 @@ export async function getAttendanceSummary(playerId: string): Promise<Attendance
   for (const row of data ?? []) summary[row.status] += 1;
   return summary;
 }
+
+export type BlueprintSummary = {
+  playerId: string;
+  blueprintId: string;
+  topPriority: string | null;
+  drillCount: number;
+};
+
+/** Each player's active Blueprint, with its first priority, for the dashboard cards. */
+export const getActiveBlueprintSummaries = cache(async (): Promise<BlueprintSummary[]> => {
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data: blueprints } = await supabase
+    .from("blueprints")
+    .select("id, player_id")
+    .eq("status", "active");
+  if (!blueprints?.length) return [];
+  const ids = blueprints.map((b) => b.id);
+  const [{ data: priorities }, { data: drills }] = await Promise.all([
+    supabase.from("blueprint_priorities").select("blueprint_id, title").eq("rank", 1).in("blueprint_id", ids),
+    supabase.from("blueprint_drills").select("blueprint_id").in("blueprint_id", ids),
+  ]);
+  return blueprints.map((b) => ({
+    playerId: b.player_id,
+    blueprintId: b.id,
+    topPriority: priorities?.find((p) => p.blueprint_id === b.id)?.title ?? null,
+    drillCount: drills?.filter((d) => d.blueprint_id === b.id).length ?? 0,
+  }));
+});
