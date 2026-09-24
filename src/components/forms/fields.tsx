@@ -104,6 +104,9 @@ export function SelectField({
   return (
     <FieldShell name={name} label={label} hint={hint} errors={errors} optional={optional}>
       <select
+        // Remount when the default changes (e.g. values returned after a failed submit):
+        // React only applies a select's default choice on mount, and forms reset to it.
+        key={String(select.defaultValue ?? "")}
         id={name}
         name={name}
         required={!optional}

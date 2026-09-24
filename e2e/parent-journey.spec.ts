@@ -25,7 +25,7 @@ async function signUpAndConfirm(page: Page, email: string, firstName: string) {
   await page.goto("/signup");
   await page.getByLabel("First name").fill(firstName);
   await page.getByLabel("Last name").fill("Tester");
-  await page.getByLabel("Email").fill(email);
+  await page.getByRole("textbox", { name: "Email" }).fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByLabel(/I am a parent or legal guardian/).check();
   await page.getByRole("button", { name: "Create account" }).click();
@@ -104,11 +104,11 @@ test("a parent signs up, adds and edits a player, manages consent, and signs bac
   await signOut(page, isMobile);
   await page.goto("/parent");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sign in");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill("not-the-password");
+  await page.getByRole("textbox", { name: "Email" }).fill(email);
+  await page.getByRole("textbox", { name: "Password" }).fill("not-the-password");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("That email and password don't match an account.")).toBeVisible();
-  await page.getByLabel("Password").fill(password);
+  await page.getByRole("textbox", { name: "Password" }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Jordan");
 
@@ -117,7 +117,7 @@ test("a parent signs up, adds and edits a player, manages consent, and signs bac
   const linkRequestedAt = new Date();
   await page.goto("/login");
   await page.getByRole("tab", { name: "Email me a link" }).click();
-  await page.getByLabel("Email").fill(email);
+  await page.getByRole("textbox", { name: "Email" }).fill(email);
   await page.getByRole("button", { name: "Email me a sign-in link" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Check your email");
   await page.goto(await latestEmailLink(email, /sign-in link/, linkRequestedAt));
@@ -139,7 +139,7 @@ test("a parent can reset a forgotten password", async ({ page }, testInfo) => {
 
   const requestedAt = new Date();
   await page.goto("/forgot-password");
-  await page.getByLabel("Email").fill(email);
+  await page.getByRole("textbox", { name: "Email" }).fill(email);
   await page.getByRole("button", { name: "Email me a reset link" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Check your email");
 
