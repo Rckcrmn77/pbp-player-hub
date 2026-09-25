@@ -51,15 +51,15 @@ export default async function TemplatePage({ params, searchParams }: PageProps<"
                   <input type="hidden" name="templateId" value={id} />
                   <input type="hidden" name="criterionId" value={c.id} />
                   <input type="hidden" name="isActive" value={String(c.is_active)} />
-                  <label className="flex flex-1 flex-col text-xs text-navy/60">
+                  <label className="flex flex-1 flex-col text-xs text-navy/70">
                     Category
                     <input name="category" defaultValue={c.category} className={input} required />
                   </label>
-                  <label className="flex flex-1 flex-col text-xs text-navy/60">
+                  <label className="flex flex-1 flex-col text-xs text-navy/70">
                     What is rated
                     <input name="name" defaultValue={c.name} className={input} required />
                   </label>
-                  <label className="flex w-20 flex-col text-xs text-navy/60">
+                  <label className="flex w-20 flex-col text-xs text-navy/70">
                     Order
                     <input
                       name="sortOrder"

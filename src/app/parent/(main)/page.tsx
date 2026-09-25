@@ -109,7 +109,7 @@ export default async function ParentDashboardPage({ searchParams }: PageProps<"/
                 >
                   <div>
                     <p className="font-medium">{formatSessionTime(s.startsAt, s.endsAt)}</p>
-                    <p className="text-sm text-navy/60">
+                    <p className="text-sm text-navy/70">
                       {s.programName}
                       {s.location && ` · ${s.location}`}
                     </p>

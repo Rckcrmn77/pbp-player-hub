@@ -4,12 +4,15 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { site, type HeaderAccount } from "@/config/site";
 import { getSessionUser, homePathFor } from "@/lib/auth/session";
+import { allowIndexing } from "@/lib/security-headers";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: site.name, template: `%s · ${site.name}` },
   description: `${site.organization} player development hub. ${site.slogan}`,
+  // Kept out of search engines during development and the pilot (NEXT_PUBLIC_ALLOW_INDEXING).
+  robots: allowIndexing() ? undefined : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -36,7 +39,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SiteHeader account={account} />
-        <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 focus:outline-none sm:py-12"
+        >
           {children}
         </main>
         <SiteFooter />

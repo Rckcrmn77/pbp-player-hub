@@ -18,7 +18,7 @@ function QueueList({ items, action }: { items: QueueItem[]; action?: "publish" }
         <li key={a.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium">{a.playerName}</p>
-            <p className="text-sm text-navy/60">
+            <p className="text-sm text-navy/70">
               {assessmentTypeLabels[a.assessment_type]} · assessed {formatDate(a.assessed_on)}
             </p>
           </div>

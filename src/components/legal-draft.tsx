@@ -17,7 +17,7 @@ export function LegalPage({ document, children }: { document: LegalDocument; chi
       )}
       <header>
         <h1 className="text-3xl font-bold tracking-tight">{document.title}</h1>
-        <p className="mt-1 text-sm text-navy/60">Version {document.version}</p>
+        <p className="mt-1 text-sm text-navy/70">Version {document.version}</p>
       </header>
       <div className="flex flex-col gap-4 leading-relaxed [&_h2]:mt-2 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-6">
         {children}

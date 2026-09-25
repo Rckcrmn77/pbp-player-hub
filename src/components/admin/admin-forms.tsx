@@ -150,7 +150,7 @@ export function AddSessionsForm({ action }: { action: Action }) {
           errors={e.repeatWeeks}
         />
       </div>
-      <p className="text-sm text-navy/60">Times are Eastern (Wilmington) time.</p>
+      <p className="text-sm text-navy/70">Times are Eastern (Wilmington) time.</p>
       <div>
         <SubmitButton pendingText="Adding…">Add sessions</SubmitButton>
       </div>

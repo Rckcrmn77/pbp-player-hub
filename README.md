@@ -6,7 +6,7 @@ _Prepare. Develop. Compete._
 The product scope, roles, and safety requirements are defined in [`PROJECT_CHARTER.md`](./PROJECT_CHARTER.md),
 which is the source of truth for what gets built.
 
-## Current status: Sprint 4 (check-ins and reporting)
+## Current status: Sprint 5 (pilot and launch readiness)
 
 - **Parents**: sign-up and sign-in, dashboard, player profiles, consent, upcoming sessions, attendance,
   programs open for registration, published assessments, the current Blueprint, weekly check-ins, progress
@@ -17,7 +17,12 @@ which is the source of truth for what gets built.
   comments), Blueprints with priorities and drills, weekly check-ins, missing check-ins and family questions,
   baseline-vs-current progress, and progress reports with approval
 - Database with Row Level Security on every table ([`docs/database.md`](./docs/database.md))
-- **All legal wording is placeholder text marked for review.** Sprint 5 is the pilot and launch readiness.
+- Accessibility checked against WCAG 2.2 AA on every page (automated in CI), strict security headers, and
+  kept out of search engines during the pilot
+- Launch readiness: [privacy review](./docs/privacy-review.md), [backup and recovery](./docs/backup-and-recovery.md)
+  (with a tested restore check), [launch checklist](./docs/launch-checklist.md) and [pilot plan](./docs/pilot-plan.md)
+- **All legal wording is placeholder text marked for review.** Nothing is deployed yet; the pilot waits on
+  the owner's hosting, accounts and legal review.
 
 ## Requirements
 
@@ -110,6 +115,8 @@ supabase/
 scripts/db/            running database tests without Docker
 docs/database.md       schema, access rules, workflow, open decisions
 docs/supabase-setup.md connecting a hosted Supabase project and Resend
+docs/launch-checklist.md, docs/pilot-plan.md, docs/privacy-review.md, docs/backup-and-recovery.md
+scripts/db/backup.sh, scripts/db/restore-check.sh   database backup and restore check
 .github/workflows/     CI: checks, unit tests, Playwright, database tests, parent journey
 ```
 
@@ -129,8 +136,10 @@ system font stack; no external fonts are loaded.
 All `.env*` files except `.env.example` are ignored by git — **never commit real credentials**. Variables
 prefixed `NEXT_PUBLIC_` are sent to the browser; secret keys must never use that prefix.
 
-The app reads only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and
-`NEXT_PUBLIC_SITE_URL`. The Supabase secret key is never used by the app.
+The app reads only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+`NEXT_PUBLIC_SITE_URL`, and the optional `NEXT_PUBLIC_FEEDBACK_EMAIL` (footer feedback link) and
+`NEXT_PUBLIC_ALLOW_INDEXING` (search engines; off unless `true`). The Supabase secret key is never used by
+the app.
 
 ## Continuous integration
 
@@ -138,7 +147,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on pu
 format check, lint, typecheck, unit tests, the Playwright smoke tests, the database tests, and the full
 parent and staff journeys (sign-up, email confirmation, players, consent, sign-in, password reset; programs,
 sessions, coach assignment, rosters, attendance; assessments, approval, publishing, Blueprints; weekly
-check-ins and progress reports) against a local Supabase stack started in Docker on the runner.
+check-ins and progress reports) and accessibility checks of every page against a local Supabase stack
+started in Docker on the runner.
 
 ## Contributing
 

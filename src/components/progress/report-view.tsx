@@ -15,7 +15,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-lg bg-surface p-3">
-      <dt className="text-sm text-navy/60">{label}</dt>
+      <dt className="text-sm text-navy/70">{label}</dt>
       <dd className="text-2xl font-bold tabular-nums">{value}</dd>
     </div>
   );
@@ -25,7 +25,7 @@ function Text({ value, empty }: { value: string | null; empty: string }) {
   return value ? (
     <p className="whitespace-pre-line">{value}</p>
   ) : (
-    <p className="text-sm text-navy/60">{empty}</p>
+    <p className="text-sm text-navy/70">{empty}</p>
   );
 }
 
@@ -66,7 +66,7 @@ export function ReportView({ detail }: { detail: ReportDetail }) {
               <Stat label="Absent" value={attendance.absent} />
             </dl>
           ) : (
-            <p className="text-sm text-navy/60">No attendance recorded.</p>
+            <p className="text-sm text-navy/70">No attendance recorded.</p>
           )}
         </Section>
         <Section title="Completed work">
@@ -81,7 +81,7 @@ export function ReportView({ detail }: { detail: ReportDetail }) {
               />
             </dl>
           ) : (
-            <p className="text-sm text-navy/60">No weekly check-ins were submitted.</p>
+            <p className="text-sm text-navy/70">No weekly check-ins were submitted.</p>
           )}
           {work && work.totalMinutes > 0 && (
             <p className="mt-2 text-sm text-navy/70">{work.totalMinutes} minutes of practice logged.</p>
@@ -119,7 +119,7 @@ export function ReportView({ detail }: { detail: ReportDetail }) {
             )}
           </div>
         ) : (
-          <p className="text-sm text-navy/60">No program recommended.</p>
+          <p className="text-sm text-navy/70">No program recommended.</p>
         )}
       </Section>
 

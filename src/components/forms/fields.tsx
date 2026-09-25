@@ -29,11 +29,11 @@ function FieldShell({
     <div>
       <label htmlFor={fieldId} className="block text-sm font-medium">
         {label}
-        {optional && <span className="font-normal text-navy/60"> (optional)</span>}
+        {optional && <span className="font-normal text-navy/70"> (optional)</span>}
       </label>
       {children}
       {hint && !errors?.length && (
-        <p id={`${fieldId}-hint`} className="mt-1 text-sm text-navy/60">
+        <p id={`${fieldId}-hint`} className="mt-1 text-sm text-navy/70">
           {hint}
         </p>
       )}

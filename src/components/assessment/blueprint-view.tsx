@@ -15,13 +15,13 @@ export function BlueprintView({ detail }: { detail: BlueprintDetail }) {
         <div className="grid gap-4 sm:grid-cols-2">
           {blueprint.player_goals && (
             <div className="rounded-xl border border-navy/10 bg-white p-4">
-              <h3 className="text-sm font-semibold text-navy/60">Player goals</h3>
+              <h3 className="text-sm font-semibold text-navy/70">Player goals</h3>
               <p className="mt-1 whitespace-pre-line">{blueprint.player_goals}</p>
             </div>
           )}
           {blueprint.coach_summary && (
             <div className="rounded-xl border border-navy/10 bg-white p-4">
-              <h3 className="text-sm font-semibold text-navy/60">From the coach</h3>
+              <h3 className="text-sm font-semibold text-navy/70">From the coach</h3>
               <p className="mt-1 whitespace-pre-line">{blueprint.coach_summary}</p>
             </div>
           )}
@@ -69,7 +69,7 @@ export function BlueprintView({ detail }: { detail: BlueprintDetail }) {
                     {" per week"}
                   </span>
                 </div>
-                <p className="text-xs text-navy/60">
+                <p className="text-xs text-navy/70">
                   {d.is_at_home ? "At home" : "At sessions"}
                   {d.drill?.equipment && ` · ${d.drill.equipment}`}
                 </p>

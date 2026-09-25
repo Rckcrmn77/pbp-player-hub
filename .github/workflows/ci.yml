@@ -88,7 +88,7 @@ jobs:
           # Local database only: the staff journey uses it to create the first admin.
           echo "SUPABASE_DB_URL=${DB_URL}" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test e2e/parent-journey.spec.ts e2e/staff-journey.spec.ts e2e/assessment-journey.spec.ts e2e/progress-journey.spec.ts
+      - run: npx playwright test e2e/parent-journey.spec.ts e2e/staff-journey.spec.ts e2e/assessment-journey.spec.ts e2e/progress-journey.spec.ts e2e/accessibility-journey.spec.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

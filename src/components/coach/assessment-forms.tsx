@@ -156,7 +156,7 @@ export function AssessmentEditor({
                 >
                   <div>
                     <p className="font-medium">{c.name}</p>
-                    {c.description && <p className="text-sm text-navy/60">{c.description}</p>}
+                    {c.description && <p className="text-sm text-navy/70">{c.description}</p>}
                   </div>
                   <div
                     role="radiogroup"
@@ -177,7 +177,7 @@ export function AssessmentEditor({
                           aria-label={r.label}
                         />
                         <span className="text-base font-bold">{r.value}</span>
-                        <span className="hidden text-navy/60 sm:block">{r.label.split(" · ")[1]}</span>
+                        <span className="hidden text-navy/70 sm:block">{r.label.split(" · ")[1]}</span>
                       </label>
                     ))}
                   </div>

@@ -17,7 +17,7 @@ function QueueList({ items, publish = false }: { items: ReportQueueItem[]; publi
         <li key={r.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium">{r.playerName}</p>
-            <p className="text-sm text-navy/60">
+            <p className="text-sm text-navy/70">
               {r.approved_at
                 ? `Approved ${formatDate(dateKey(r.approved_at))}`
                 : r.submitted_at

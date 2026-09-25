@@ -43,7 +43,7 @@ export function PlayerCard({
           {programs.map((p) => (
             <li key={p.enrollmentId}>
               <span className="font-medium">{p.programName}</span>
-              <span className="text-navy/60">
+              <span className="text-navy/70">
                 {" "}
                 · {enrollmentStatusOptions.find((o) => o.value === p.status)?.label}
               </span>
