@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { SelectField, TextAreaField, TextField } from "@/components/forms/fields";
+import { TextAreaField, TextField } from "@/components/forms/fields";
 import { FormMessage, SubmitButton } from "@/components/forms/form-status";
 import { confidenceScale } from "@/config/progress";
 import { idleState, type FormState } from "@/lib/validation/form";
@@ -10,7 +10,7 @@ import { idleState, type FormState } from "@/lib/validation/form";
 type Action = (prev: FormState, formData: FormData) => Promise<FormState>;
 
 const choice =
-  "flex cursor-pointer flex-col items-center rounded-md border border-navy/15 px-2 py-2 text-center text-sm " +
+  "flex min-w-0 cursor-pointer flex-col items-center rounded-md border border-navy/15 px-1 py-2 text-center text-sm " +
   "has-[:checked]:border-carolina-dark has-[:checked]:bg-carolina-light has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-carolina";
 
 function ChoiceGroup({
@@ -42,7 +42,7 @@ function ChoiceGroup({
               defaultChecked={defaultValue === o.value}
             />
             <span className="font-semibold">{o.label}</span>
-            {o.detail && <span className="text-xs text-navy/60">{o.detail}</span>}
+            {o.detail && <span className="text-xs leading-tight break-words text-navy/60">{o.detail}</span>}
           </label>
         ))}
       </div>
@@ -56,7 +56,6 @@ function ChoiceGroup({
 }
 
 export type CheckinDefaults = {
-  weekStart: string;
   assignmentCompleted?: "yes" | "no";
   repsCompleted?: string;
   minutesCompleted?: string;
@@ -67,13 +66,15 @@ export type CheckinDefaults = {
 
 export function CheckinForm({
   action,
-  weeks,
+  weekStart,
+  weekLabel,
   defaults,
   playerName,
   editing,
 }: {
   action: Action;
-  weeks: { value: string; label: string }[];
+  weekStart: string;
+  weekLabel: string;
   defaults: CheckinDefaults;
   playerName: string;
   editing: boolean;
@@ -84,15 +85,13 @@ export function CheckinForm({
   return (
     <form action={formAction} className="flex flex-col gap-5" noValidate>
       <FormMessage state={state} />
-      <SelectField
-        name="weekStart"
-        label="Week"
-        options={weeks}
-        defaultValue={v.weekStart}
-        errors={e.weekStart}
-        disabled={editing}
-      />
-      {editing && <input type="hidden" name="weekStart" value={defaults.weekStart} />}
+      <input type="hidden" name="weekStart" value={weekStart} />
+      <div>
+        <h2 className="text-lg font-semibold">{weekLabel}</h2>
+        {e.weekStart?.length ? (
+          <p className="text-sm font-medium text-orange-dark">{e.weekStart[0]}</p>
+        ) : null}
+      </div>
       <ChoiceGroup
         name="assignmentCompleted"
         legend={`Did ${playerName} complete this week's assignment?`}

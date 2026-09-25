@@ -101,7 +101,7 @@ export default async function CoachDashboardPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Coach dashboard</h1>
-        <p className="mt-2 text-navy/80">Your sessions, rosters, and attendance.</p>
+        <p className="mt-2 text-navy/80">Your sessions, players, check-ins, and approvals.</p>
       </div>
 
       {programs.length === 0 ? (

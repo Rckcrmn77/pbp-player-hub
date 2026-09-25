@@ -42,7 +42,6 @@ export default async function CheckinPage({
   );
   const defaults: CheckinDefaults = existing
     ? {
-        weekStart: existing.week_start,
         assignmentCompleted: existing.assignment_completed ? "yes" : "no",
         repsCompleted: existing.reps_completed?.toString() ?? "",
         minutesCompleted: existing.minutes_completed?.toString() ?? "",
@@ -50,7 +49,7 @@ export default async function CheckinPage({
         reflection: existing.reflection ?? "",
         questionForCoach: existing.question_for_coach ?? "",
       }
-    : { weekStart: selected };
+    : {};
   const targets = blueprint.drills
     .filter((d) => d.is_at_home)
     .map((d) =>
@@ -76,7 +75,7 @@ export default async function CheckinPage({
         <h1 className="mt-1 text-3xl font-bold tracking-tight">Weekly check-in</h1>
         <p className="mt-1 text-navy/70">
           {existing
-            ? `Editing the check-in for the ${formatWeek(selected).toLowerCase()}.`
+            ? `You already checked in for ${selected === weeks[0] ? "this week" : "last week"}. Update it if anything changed.`
             : "Takes about a minute. Fill it in with your player."}
         </p>
       </div>
@@ -109,7 +108,8 @@ export default async function CheckinPage({
         <CheckinForm
           key={selected}
           action={saveCheckin.bind(null, id)}
-          weeks={weeks.map((w) => ({ value: w, label: formatWeek(w) }))}
+          weekStart={selected}
+          weekLabel={formatWeek(selected)}
           defaults={defaults}
           playerName={player.first_name}
           editing={!!existing}
