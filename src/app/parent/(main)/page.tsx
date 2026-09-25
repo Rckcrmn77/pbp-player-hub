@@ -13,11 +13,10 @@ import {
   getMyUpcomingSessions,
   getOpenPrograms,
 } from "@/lib/data/parent";
-import { formatDate, formatSessionTime } from "@/lib/time";
+import { checkinStatuses, latestPublishedReports } from "@/lib/data/progress";
+import { dateKey, formatDate, formatSessionTime, weekStart } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Parent dashboard" };
-
-const comingLater = ["Weekly check-ins", "Latest progress report"];
 
 export default async function ParentDashboardPage({ searchParams }: PageProps<"/parent">) {
   const [{ notice }, user, players, consents, playerPrograms, openPrograms, blueprints] = await Promise.all([
@@ -29,7 +28,11 @@ export default async function ParentDashboardPage({ searchParams }: PageProps<"/
     getOpenPrograms(),
     getActiveBlueprintSummaries(),
   ]);
-  const upcoming = await getMyUpcomingSessions(players, playerPrograms);
+  const [upcoming, checkins, reports] = await Promise.all([
+    getMyUpcomingSessions(players, playerPrograms),
+    checkinStatuses(weekStart(dateKey(new Date()))),
+    latestPublishedReports(),
+  ]);
   const firstName = user?.profile.first_name;
 
   return (
@@ -79,6 +82,8 @@ export default async function ParentDashboardPage({ searchParams }: PageProps<"/
                   consent={consentStatus(consents, "parental_consent", player.id).status}
                   programs={playerPrograms.filter((p) => p.playerId === player.id)}
                   blueprint={blueprints.find((b) => b.playerId === player.id)}
+                  checkedInThisWeek={checkins.find((c) => c.playerId === player.id)?.thisWeekDone}
+                  latestReport={reports.get(player.id)}
                 />
               </li>
             ))}
@@ -146,19 +151,6 @@ export default async function ParentDashboardPage({ searchParams }: PageProps<"/
           </ul>
         </section>
       )}
-
-      <section aria-labelledby="later-heading" className="flex flex-col gap-3">
-        <h2 id="later-heading" className="text-xl font-semibold">
-          Coming in later releases
-        </h2>
-        <ul className="grid gap-2 text-sm text-navy/70 sm:grid-cols-2 lg:grid-cols-3">
-          {comingLater.map((item) => (
-            <li key={item} className="rounded-lg border border-navy/10 bg-white px-4 py-3">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

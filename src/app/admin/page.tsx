@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { listReviewQueue } from "@/lib/data/assessments";
+import { listReportQueue } from "@/lib/data/progress";
 import { getAdminCounts } from "@/lib/data/staff";
 
 export const metadata: Metadata = { title: "Admin" };
 
-const later = ["Drill library", "Assessment templates", "Report publication"];
-
 export default async function AdminPage() {
-  const counts = await getAdminCounts();
+  const [counts, assessmentsReady, reportsReady] = await Promise.all([
+    getAdminCounts(),
+    listReviewQueue(["approved"]),
+    listReportQueue(["approved"]),
+  ]);
   const tiles = [
     {
       label: "Programs open or in progress",
@@ -62,13 +66,26 @@ export default async function AdminPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Coming in later sprints</h2>
-        <ul className="grid gap-2 text-sm text-navy/70 sm:grid-cols-3">
-          {later.map((item) => (
-            <li key={item} className="rounded-lg border border-navy/10 bg-white px-4 py-3">
-              {item}
-            </li>
-          ))}
+        <h2 className="text-xl font-semibold">Ready to publish to families</h2>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          <li>
+            <Link
+              href="/admin/assessments"
+              className="flex h-full flex-col rounded-xl border border-navy/10 bg-white p-4 hover:border-carolina-dark"
+            >
+              <span className="text-3xl font-bold tabular-nums">{assessmentsReady.length}</span>
+              <span className="text-sm text-navy/70">Approved assessments</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/admin/reports"
+              className="flex h-full flex-col rounded-xl border border-navy/10 bg-white p-4 hover:border-carolina-dark"
+            >
+              <span className="text-3xl font-bold tabular-nums">{reportsReady.length}</span>
+              <span className="text-sm text-navy/70">Approved progress reports</span>
+            </Link>
+          </li>
         </ul>
       </section>
     </div>

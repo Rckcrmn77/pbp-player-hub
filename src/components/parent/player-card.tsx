@@ -4,18 +4,23 @@ import { ageGroupOptions, labelFor, positionOptions, programOptions } from "@/co
 import { enrollmentStatusOptions } from "@/config/program-options";
 import type { ConsentStatus } from "@/lib/consent";
 import type { BlueprintSummary, PlayerProgram } from "@/lib/data/parent";
-import type { PlayerRow } from "@/lib/supabase/types";
+import type { PlayerRow, ProgressReportRow } from "@/lib/supabase/types";
 
 export function PlayerCard({
   player,
   consent,
   programs = [],
   blueprint,
+  checkedInThisWeek,
+  latestReport,
 }: {
   player: PlayerRow;
   consent: ConsentStatus;
   programs?: PlayerProgram[];
   blueprint?: BlueprintSummary;
+  /** Undefined when the player has no active Blueprint (no check-ins due). */
+  checkedInThisWeek?: boolean;
+  latestReport?: ProgressReportRow;
 }) {
   return (
     <article className="flex h-full flex-col gap-3 rounded-xl border border-navy/10 bg-white p-5">
@@ -54,6 +59,25 @@ export function PlayerCard({
             {blueprint.drillCount} drill{blueprint.drillCount === 1 ? "" : "s"} assigned
           </p>
         </div>
+      )}
+      {checkedInThisWeek !== undefined &&
+        (checkedInThisWeek ? (
+          <p className="text-sm text-navy/70">This week&apos;s check-in is done.</p>
+        ) : (
+          <Link
+            href={`/parent/players/${player.id}/check-in`}
+            className="self-start rounded-md bg-orange px-3 py-2 text-sm font-semibold text-white hover:bg-orange-dark"
+          >
+            Check in for this week
+          </Link>
+        ))}
+      {latestReport && (
+        <Link
+          href={`/parent/players/${player.id}/reports/${latestReport.id}`}
+          className="text-sm font-semibold text-carolina-dark underline"
+        >
+          Latest progress report
+        </Link>
       )}
       {consent !== "granted" && (
         <p className="rounded-md bg-orange/10 px-3 py-2 text-sm font-medium text-orange-dark">

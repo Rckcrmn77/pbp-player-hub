@@ -16,7 +16,10 @@ import { BlueprintView } from "@/components/assessment/blueprint-view";
 import { assessmentTypeLabels } from "@/config/assessment";
 import { attendanceOptions, enrollmentStatusOptions } from "@/config/program-options";
 import { getActiveBlueprint, getAssessmentDetail, listPlayerAssessments } from "@/lib/data/assessments";
-import { formatDate } from "@/lib/time";
+import { CheckinList } from "@/components/progress/checkin-list";
+import { ProgressComparison } from "@/components/progress/progress-comparison";
+import { getProgressComparison, listCheckins, listPlayerReports } from "@/lib/data/progress";
+import { dateKey, formatDate, weekStart } from "@/lib/time";
 import {
   getAttendanceSummary,
   getMyConsentRecords,
@@ -44,11 +47,18 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
   ]);
   if (!player) notFound();
   const programs = allPrograms.filter((p) => p.playerId === player.id);
-  const [attendance, blueprint, published] = await Promise.all([
+  const [attendance, blueprint, published, checkins, reports, comparison] = await Promise.all([
     getAttendanceSummary(player.id),
     getActiveBlueprint(player.id),
     listPlayerAssessments(player.id),
+    listCheckins(player.id),
+    listPlayerReports(player.id),
+    getProgressComparison(player.id, { onlyPublished: true }),
   ]);
+  const thisWeek = weekStart(dateKey(new Date()));
+  const checkedInThisWeek = checkins.some(
+    (c) => c.blueprint_id === blueprint?.blueprint.id && c.week_start === thisWeek,
+  );
   // Row Level Security returns only published assessments to families.
   const assessments = (await Promise.all(published.map((a) => getAssessmentDetail(a.id)))).filter(
     (d) => d !== null,
@@ -119,6 +129,70 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
           </p>
         )}
       </section>
+
+      {blueprint && (
+        <section aria-labelledby="checkins-heading" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="checkins-heading" className="text-xl font-semibold">
+              Weekly check-ins
+            </h2>
+            <Link
+              href={`/parent/players/${player.id}/check-in`}
+              className={
+                checkedInThisWeek
+                  ? "rounded-md border border-navy/20 bg-white px-3 py-2 text-sm font-semibold hover:border-carolina-dark"
+                  : "rounded-md bg-orange px-3 py-2 text-sm font-semibold text-white hover:bg-orange-dark"
+              }
+            >
+              {checkedInThisWeek ? "Edit this week's check-in" : "Check in for this week"}
+            </Link>
+          </div>
+          <CheckinList
+            checkins={checkins.slice(0, 6)}
+            empty="No check-ins yet. Each week, record the work done and how it felt."
+          />
+        </section>
+      )}
+
+      <section aria-labelledby="reports-heading" className="flex flex-col gap-3">
+        <h2 id="reports-heading" className="text-xl font-semibold">
+          Progress reports
+        </h2>
+        {reports.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-navy/20 bg-white p-4 text-sm text-navy/70">
+            No progress reports yet. The coach writes one at the end of each development cycle.
+          </p>
+        ) : (
+          <ul className="divide-y divide-navy/10 rounded-xl border border-navy/10 bg-white">
+            {reports.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/parent/players/${player.id}/reports/${r.id}`}
+                  className="flex justify-between gap-3 p-4 hover:bg-surface"
+                >
+                  <span className="font-medium">Progress report</span>
+                  <span className="text-sm text-navy/60">
+                    Published {r.published_at ? formatDate(dateKey(r.published_at)) : ""}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {comparison?.current && (
+        <section aria-labelledby="progress-heading" className="rounded-xl border border-navy/10 bg-white p-5">
+          <h2 id="progress-heading" className="mb-3 text-lg font-semibold">
+            Progress since the baseline
+          </h2>
+          <ProgressComparison
+            rows={comparison.rows}
+            baselineLabel={`Baseline (${formatDate(comparison.baseline.assessed_on)})`}
+            currentLabel={`Latest (${formatDate(comparison.current.assessed_on)})`}
+          />
+        </section>
+      )}
 
       <section aria-labelledby="assessments-heading" className="flex flex-col gap-3">
         <h2 id="assessments-heading" className="text-xl font-semibold">

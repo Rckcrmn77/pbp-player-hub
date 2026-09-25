@@ -16,6 +16,10 @@ import {
   listTemplates,
 } from "@/lib/data/assessments";
 import { getMyCoachPrograms, getRoster } from "@/lib/data/staff";
+import { CheckinList } from "@/components/progress/checkin-list";
+import { ProgressComparison } from "@/components/progress/progress-comparison";
+import { startReport } from "@/lib/actions/progress";
+import { getProgressComparison, listCheckins, listPlayerReports } from "@/lib/data/progress";
 import { dateKey, formatDate } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Player" };
@@ -26,11 +30,14 @@ export default async function CoachPlayerPage({ params, searchParams }: PageProp
   if (!player) notFound();
   const user = (await getSessionUser())!;
 
-  const [assessments, blueprints, templates, myPrograms] = await Promise.all([
+  const [assessments, blueprints, templates, myPrograms, checkins, reports, comparison] = await Promise.all([
     listPlayerAssessments(id),
     listPlayerBlueprints(id),
     listTemplates(),
     getMyCoachPrograms(user.id),
+    listCheckins(id),
+    listPlayerReports(id),
+    getProgressComparison(id),
   ]);
   const rosters = await Promise.all(
     myPrograms.map(async (p) => ({ program: p, roster: await getRoster(p.id) })),
@@ -149,6 +156,81 @@ export default async function CoachPlayerPage({ params, searchParams }: PageProp
               className="rounded-md bg-orange px-4 py-2.5 font-semibold text-white hover:bg-orange-dark"
             >
               Start a Blueprint
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section aria-labelledby="progress-heading" className="flex flex-col gap-3">
+        <h2 id="progress-heading" className="text-xl font-semibold">
+          Progress
+        </h2>
+        <div className="rounded-xl border border-navy/10 bg-white p-5">
+          {comparison ? (
+            <ProgressComparison
+              rows={comparison.rows}
+              baselineLabel={`Baseline (${formatDate(comparison.baseline.assessed_on)})`}
+              currentLabel={
+                comparison.current ? `Latest (${formatDate(comparison.current.assessed_on)})` : "Latest"
+              }
+            />
+          ) : (
+            <p className="text-sm text-navy/70">
+              Progress appears once a baseline assessment is submitted. Compare it with a follow-up later in
+              the cycle.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section aria-labelledby="checkins-heading" className="flex flex-col gap-3">
+        <h2 id="checkins-heading" className="text-xl font-semibold">
+          Weekly check-ins
+        </h2>
+        <CheckinList
+          checkins={checkins.slice(0, 8)}
+          empty="No check-ins yet. Families check in each week once a Blueprint is active."
+        />
+      </section>
+
+      <section aria-labelledby="reports-heading" className="flex flex-col gap-3">
+        <h2 id="reports-heading" className="text-xl font-semibold">
+          Progress reports
+        </h2>
+        {reports.length > 0 && (
+          <ul className="divide-y divide-navy/10 rounded-xl border border-navy/10 bg-white">
+            {reports.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/coach/reports/${r.id}`}
+                  className="flex flex-col gap-1 p-4 hover:bg-surface sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <span className="font-medium">Started {formatDate(dateKey(r.created_at))}</span>
+                  <StatusPill
+                    tone={r.status === "published" ? "good" : r.status === "draft" ? "neutral" : "warn"}
+                  >
+                    {reviewStatusLabels[r.status]}
+                  </StatusPill>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form
+          action={startReport}
+          className="flex flex-col gap-2 rounded-xl border border-navy/10 bg-white p-4"
+        >
+          <input type="hidden" name="playerId" value={id} />
+          <p className="text-sm text-navy/70">
+            A report copies in the baseline and latest ratings, attendance, and check-in totals. You add
+            observations, strengths, priorities, and a 30-day plan.
+          </p>
+          <div>
+            <button
+              type="submit"
+              className="rounded-md bg-orange px-4 py-2.5 font-semibold text-white hover:bg-orange-dark"
+            >
+              Start a progress report
             </button>
           </div>
         </form>

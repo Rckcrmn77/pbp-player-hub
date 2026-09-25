@@ -14,11 +14,35 @@ import {
   getSessionsBetween,
   type SessionWithProgram,
 } from "@/lib/data/staff";
-import { addDays, dateKey, formatDate, zonedToUtc } from "@/lib/time";
+import { listReportQueue, playersMissingCheckin, recentQuestions } from "@/lib/data/progress";
+import { addDays, dateKey, formatDate, formatWeek, weekStart, zonedToUtc } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Coach dashboard" };
 
-const later = ["Missing check-ins", "Progress report approvals"];
+type PlayerLink = { playerId: string; name: string; detail: string };
+
+function PlayerLinks({ id, title, items }: { id: string; title: string; items: PlayerLink[] }) {
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-3">
+      <h2 id={id} className="text-xl font-semibold">
+        {title}
+      </h2>
+      <ul className="divide-y divide-navy/10 rounded-xl border border-navy/10 bg-white">
+        {items.map((item, i) => (
+          <li key={`${item.playerId}-${i}`}>
+            <Link
+              href={`/coach/players/${item.playerId}`}
+              className="flex justify-between gap-3 p-4 hover:bg-surface"
+            >
+              <span className="font-medium">{item.name}</span>
+              <span className="text-right text-sm text-navy/60">{item.detail}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 export default async function CoachDashboardPage() {
   const user = (await getSessionUser())!;
@@ -47,7 +71,18 @@ export default async function CoachDashboardPage() {
       .filter((r) => r.status === "active" || r.status === "pending")
       .map((r) => [r.player_id, r.player]),
   );
-  const missingBaseline = await playersWithoutBaseline([...rosterPlayers.keys()]);
+  const rosterIds = [...rosterPlayers.keys()];
+  const lastWeek = addDays(weekStart(today), -7);
+  const [missingBaseline, missingCheckin, questions, reportsToApprove] = await Promise.all([
+    playersWithoutBaseline(rosterIds),
+    playersMissingCheckin(rosterIds, lastWeek),
+    recentQuestions(rosterIds, addDays(lastWeek, -7)),
+    listReportQueue(["submitted"]),
+  ]);
+  const nameOf = (playerId: string) => {
+    const p = rosterPlayers.get(playerId);
+    return p ? `${p.first_name} ${p.last_name}` : "Player";
+  };
   const marked = new Map<string, number>();
   for (const a of attendance) marked.set(a.session_id, (marked.get(a.session_id) ?? 0) + 1);
   const rosterSize = new Map(programs.map((p) => [p.id, p.rosterCount]));
@@ -66,7 +101,7 @@ export default async function CoachDashboardPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Coach dashboard</h1>
-        <p className="mt-2 text-navy/80">Your sessions, rosters, and attendance.</p>
+        <p className="mt-2 text-navy/80">Your sessions, players, check-ins, and approvals.</p>
       </div>
 
       {programs.length === 0 ? (
@@ -91,7 +126,11 @@ export default async function CoachDashboardPage() {
             </section>
           )}
 
-          {(awaitingApproval.length > 0 || missingBaseline.size > 0) && (
+          {(awaitingApproval.length > 0 ||
+            reportsToApprove.length > 0 ||
+            missingBaseline.size > 0 ||
+            missingCheckin.size > 0 ||
+            questions.length > 0) && (
             <div className="grid gap-6 lg:grid-cols-2">
               {awaitingApproval.length > 0 && (
                 <section aria-labelledby="approval-heading" className="flex flex-col gap-3">
@@ -115,30 +154,58 @@ export default async function CoachDashboardPage() {
                   </ul>
                 </section>
               )}
-              {missingBaseline.size > 0 && (
-                <section aria-labelledby="baseline-heading" className="flex flex-col gap-3">
-                  <h2 id="baseline-heading" className="text-xl font-semibold">
-                    Players without a baseline assessment
+              {reportsToApprove.length > 0 && (
+                <section aria-labelledby="report-approval-heading" className="flex flex-col gap-3">
+                  <h2 id="report-approval-heading" className="text-xl font-semibold">
+                    Progress reports to approve
                   </h2>
                   <ul className="divide-y divide-navy/10 rounded-xl border border-navy/10 bg-white">
-                    {[...missingBaseline].map((playerId) => {
-                      const p = rosterPlayers.get(playerId)!;
-                      return (
-                        <li key={playerId}>
-                          <Link
-                            href={`/coach/players/${playerId}`}
-                            className="flex justify-between gap-3 p-4 hover:bg-surface"
-                          >
-                            <span className="font-medium">
-                              {p.first_name} {p.last_name}
-                            </span>
-                            <span className="text-sm font-semibold text-carolina-dark">Assess</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                    {reportsToApprove.map((r) => (
+                      <li key={r.id}>
+                        <Link
+                          href={`/coach/reports/${r.id}`}
+                          className="flex justify-between gap-3 p-4 hover:bg-surface"
+                        >
+                          <span className="font-medium">{r.playerName}</span>
+                          <span className="text-sm font-semibold text-carolina-dark">Review</span>
+                        </Link>
+                      </li>
+                    ))}
                   </ul>
                 </section>
+              )}
+              {missingBaseline.size > 0 && (
+                <PlayerLinks
+                  id="baseline-heading"
+                  title="Players without a baseline assessment"
+                  items={[...missingBaseline].map((playerId) => ({
+                    playerId,
+                    name: nameOf(playerId),
+                    detail: "Assess",
+                  }))}
+                />
+              )}
+              {missingCheckin.size > 0 && (
+                <PlayerLinks
+                  id="checkin-heading"
+                  title="Missing check-ins"
+                  items={[...missingCheckin].map((playerId) => ({
+                    playerId,
+                    name: nameOf(playerId),
+                    detail: formatWeek(lastWeek),
+                  }))}
+                />
+              )}
+              {questions.length > 0 && (
+                <PlayerLinks
+                  id="questions-heading"
+                  title="Questions from families"
+                  items={questions.map((q) => ({
+                    playerId: q.player_id,
+                    name: nameOf(q.player_id),
+                    detail: q.question_for_coach ?? "",
+                  }))}
+                />
               )}
             </div>
           )}
@@ -180,19 +247,6 @@ export default async function CoachDashboardPage() {
           </section>
         </>
       )}
-
-      <section aria-labelledby="later-heading" className="flex flex-col gap-3">
-        <h2 id="later-heading" className="text-xl font-semibold">
-          Coming in later sprints
-        </h2>
-        <ul className="grid gap-2 text-sm text-navy/70 sm:grid-cols-2">
-          {later.map((item) => (
-            <li key={item} className="rounded-lg border border-navy/10 bg-white px-4 py-3">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }
