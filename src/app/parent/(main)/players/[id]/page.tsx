@@ -32,7 +32,7 @@ export const metadata: Metadata = { title: "Player profile" };
 function Detail({ label, value }: { label: string; value: string | number | null }) {
   return (
     <div>
-      <dt className="text-sm text-navy/60">{label}</dt>
+      <dt className="text-sm text-navy/70">{label}</dt>
       <dd className="font-medium whitespace-pre-line">{value === null || value === "" ? "—" : value}</dd>
     </div>
   );
@@ -171,7 +171,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
                   className="flex justify-between gap-3 p-4 hover:bg-surface"
                 >
                   <span className="font-medium">Progress report</span>
-                  <span className="text-sm text-navy/60">
+                  <span className="text-sm text-navy/70">
                     Published {r.published_at ? formatDate(dateKey(r.published_at)) : ""}
                   </span>
                 </Link>
@@ -234,7 +234,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
               {programs.map((p) => (
                 <li key={p.enrollmentId}>
                   <span className="font-medium">{p.programName}</span>
-                  <span className="text-navy/60">
+                  <span className="text-navy/70">
                     {" "}
                     · {enrollmentStatusOptions.find((o) => o.value === p.status)?.label}
                   </span>
@@ -247,7 +247,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
               <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {attendanceOptions.map((o) => (
                   <div key={o.value} className="rounded-lg bg-surface p-3">
-                    <dt className="text-sm text-navy/60">{o.label}</dt>
+                    <dt className="text-sm text-navy/70">{o.label}</dt>
                     <dd className="text-2xl font-bold tabular-nums">{attendance[o.value]}</dd>
                   </div>
                 ))}

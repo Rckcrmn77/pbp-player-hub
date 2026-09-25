@@ -147,7 +147,7 @@ export default async function BlueprintPage({ params, searchParams }: PageProps<
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                 <div>
                   <p className="font-medium">{d.drill?.title ?? "Drill"}</p>
-                  <p className="text-sm text-navy/60">
+                  <p className="text-sm text-navy/70">
                     {[
                       d.weekly_reps_target && `${d.weekly_reps_target} reps`,
                       d.weekly_minutes_target && `${d.weekly_minutes_target} min`,

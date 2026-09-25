@@ -42,7 +42,7 @@ function ChoiceGroup({
               defaultChecked={defaultValue === o.value}
             />
             <span className="font-semibold">{o.label}</span>
-            {o.detail && <span className="text-xs leading-tight break-words text-navy/60">{o.detail}</span>}
+            {o.detail && <span className="text-xs leading-tight break-words text-navy/70">{o.detail}</span>}
           </label>
         ))}
       </div>

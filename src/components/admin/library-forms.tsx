@@ -28,7 +28,7 @@ function CheckboxGroup({
   return (
     <fieldset>
       <legend className="text-sm font-medium">{legend}</legend>
-      {hint && <p className="text-sm text-navy/60">{hint}</p>}
+      {hint && <p className="text-sm text-navy/70">{hint}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((o) => (
           <label
@@ -207,7 +207,7 @@ export function TemplateForm({ action, template }: { action: Action; template?: 
           errors={e.position}
         />
       </div>
-      <p className="text-sm text-navy/60">
+      <p className="text-sm text-navy/70">
         “None” means the template can be used for every age group or position.
       </p>
       <ActiveSwitch label="Coaches can use this template" defaultChecked={template?.is_active ?? true} />

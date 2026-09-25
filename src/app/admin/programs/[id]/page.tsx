@@ -91,14 +91,14 @@ export default async function AdminProgramPage({ params, searchParams }: PagePro
       <Section id="details-heading" title="Details">
         <dl className="grid gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-sm text-navy/60">Status</dt>
+            <dt className="text-sm text-navy/70">Status</dt>
             <dd>
               <StatusPill tone={program.status === "draft" ? "warn" : "good"}>{status?.label}</StatusPill>
-              <span className="ml-2 text-sm text-navy/60">{status?.hint}</span>
+              <span className="ml-2 text-sm text-navy/70">{status?.hint}</span>
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-navy/60">Players</dt>
+            <dt className="text-sm text-navy/70">Players</dt>
             <dd className="font-medium">
               {labelFor(ageGroupOptions, program.age_group) === "—"
                 ? "All age groups"
@@ -108,11 +108,11 @@ export default async function AdminProgramPage({ params, searchParams }: PagePro
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-sm text-navy/60">Schedule</dt>
+            <dt className="text-sm text-navy/70">Schedule</dt>
             <dd className="font-medium whitespace-pre-line">{program.schedule_description || "—"}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-sm text-navy/60">Registration link</dt>
+            <dt className="text-sm text-navy/70">Registration link</dt>
             <dd className="font-medium break-all">
               {program.registration_url ? (
                 <a
@@ -137,10 +137,10 @@ export default async function AdminProgramPage({ params, searchParams }: PagePro
             {sessions.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                 <div>
-                  <p className={`font-medium ${s.status === "cancelled" ? "text-navy/50 line-through" : ""}`}>
+                  <p className={`font-medium ${s.status === "cancelled" ? "text-navy/70 line-through" : ""}`}>
                     {formatSessionTime(s.starts_at, s.ends_at)}
                   </p>
-                  <p className="text-sm text-navy/60">
+                  <p className="text-sm text-navy/70">
                     {s.location || program.location || "Location to be confirmed"}
                   </p>
                 </div>
@@ -182,7 +182,7 @@ export default async function AdminProgramPage({ params, searchParams }: PagePro
               <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
                 <div>
                   <p className="font-medium">{c.name}</p>
-                  <p className="text-sm text-navy/60">
+                  <p className="text-sm text-navy/70">
                     {assignmentRoleOptions.find((o) => o.value === c.assignment_role)?.label}
                   </p>
                 </div>
@@ -212,7 +212,7 @@ export default async function AdminProgramPage({ params, searchParams }: PagePro
                   <p className="font-medium">
                     {r.player.first_name} {r.player.last_name}
                   </p>
-                  <p className="text-sm text-navy/60">
+                  <p className="text-sm text-navy/70">
                     Class of {r.player.graduation_year} ·{" "}
                     {labelFor(positionOptions, r.player.primary_position)}
                   </p>

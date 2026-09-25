@@ -18,10 +18,11 @@ export function ProgressComparison({
   if (rows.length === 0) return <p className="text-sm text-navy/70">No ratings to compare yet.</p>;
   const hasCurrent = rows.some((r) => r.current !== null);
   return (
-    <div className="overflow-x-auto">
+    // Focusable so keyboard users can scroll the table sideways on narrow screens.
+    <div className="overflow-x-auto" tabIndex={0} role="group" aria-label="Ratings by category">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-navy/10 text-navy/60">
+          <tr className="border-b border-navy/10 text-navy/70">
             <th scope="col" className="py-2 pr-3 font-medium">
               Category
             </th>

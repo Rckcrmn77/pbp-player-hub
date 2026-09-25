@@ -15,10 +15,10 @@ export function SessionList({ sessions, empty }: { sessions: SessionListItem[]; 
         return (
           <li key={s.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className={`font-medium ${s.status === "cancelled" ? "text-navy/50 line-through" : ""}`}>
+              <p className={`font-medium ${s.status === "cancelled" ? "text-navy/70 line-through" : ""}`}>
                 {formatSessionTime(s.starts_at, s.ends_at)}
               </p>
-              <p className="text-sm text-navy/60">{s.programName}</p>
+              <p className="text-sm text-navy/70">{s.programName}</p>
             </div>
             <div className="flex items-center gap-3">
               {s.status === "cancelled" ? (

@@ -50,7 +50,7 @@ export function AttendanceForm({
           >
             <div>
               <p className="font-medium">{row.name}</p>
-              <p className="text-sm text-navy/60">{row.detail}</p>
+              <p className="text-sm text-navy/70">{row.detail}</p>
             </div>
             <fieldset>
               <legend className="sr-only">Attendance for {row.name}</legend>

@@ -38,7 +38,7 @@ export default async function PeoplePage({ searchParams }: PageProps<"/admin/peo
             >
               <div className="min-w-0">
                 <p className="font-semibold">
-                  {person.name} {isMe && <span className="font-normal text-navy/60">(you)</span>}
+                  {person.name} {isMe && <span className="font-normal text-navy/70">(you)</span>}
                 </p>
                 <p className="text-sm break-all text-navy/70">{person.email || "No email on file"}</p>
                 <div className="mt-1 flex flex-wrap gap-2">

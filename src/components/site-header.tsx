@@ -130,7 +130,9 @@ function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={`${block ? "block py-3" : "py-2"} rounded-md px-3 text-sm font-medium ${
-        active ? "bg-white/10 text-carolina" : "text-white/90 hover:bg-white/10 hover:text-white"
+        active
+          ? "bg-white/10 text-white underline decoration-carolina decoration-2 underline-offset-4"
+          : "text-white/90 hover:bg-white/10 hover:text-white"
       }`}
     >
       {label}

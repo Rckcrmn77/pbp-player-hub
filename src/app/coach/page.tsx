@@ -35,7 +35,7 @@ function PlayerLinks({ id, title, items }: { id: string; title: string; items: P
               className="flex justify-between gap-3 p-4 hover:bg-surface"
             >
               <span className="font-medium">{item.name}</span>
-              <span className="text-right text-sm text-navy/60">{item.detail}</span>
+              <span className="text-right text-sm text-navy/70">{item.detail}</span>
             </Link>
           </li>
         ))}
@@ -145,7 +145,7 @@ export default async function CoachDashboardPage() {
                           className="flex justify-between gap-3 p-4 hover:bg-surface"
                         >
                           <span className="font-medium">{a.playerName}</span>
-                          <span className="text-sm text-navy/60">
+                          <span className="text-sm text-navy/70">
                             {assessmentTypeLabels[a.assessment_type]}
                           </span>
                         </Link>
