@@ -37,6 +37,13 @@ const notices: Record<string, string> = {
   "priority-removed": "Priority removed.",
   "drill-assigned": "Drill assigned.",
   "drill-removed": "Drill removed from this Blueprint.",
+  "checkin-saved": "Check-in saved. Thanks! The coach can see it now.",
+  "report-created": "Progress report started. Figures are filled in; add your write-up.",
+  "report-refreshed": "Figures refreshed.",
+  "report-submitted": "Report submitted for approval.",
+  "report-approved": "Report approved. An administrator will publish it to the family.",
+  "report-returned": "Report returned to draft.",
+  "report-published": "Report published. The family can see it now.",
   error: "We couldn't save that change. Please try again.",
 };
 

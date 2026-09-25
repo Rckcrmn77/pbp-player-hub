@@ -93,3 +93,15 @@ export function timeKey(instant: Date | string, timeZone = PBP_TIME_ZONE): strin
     hourCycle: "h23",
   }).format(new Date(instant));
 }
+
+/** The Monday ("YYYY-MM-DD") of the week containing a "YYYY-MM-DD" date. */
+export function weekStart(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const isoDay = new Date(Date.UTC(y, m - 1, d)).getUTCDay() || 7;
+  return addDays(date, 1 - isoDay);
+}
+
+/** "Week of Oct 5, 2026" from a Monday "YYYY-MM-DD". */
+export function formatWeek(monday: string): string {
+  return `Week of ${formatDate(monday)}`;
+}

@@ -134,8 +134,9 @@ insert into public.coach_notes (id, player_id, author_id, visibility, body) valu
   (tests.id('staffNote'), tests.id('playerA'), tests.id('coach1'), 'staff_only', 'Staff-only observation.'),
   (tests.id('parentNote'), tests.id('playerA'), tests.id('coach1'), 'parent_visible', 'Great effort this week.');
 
-insert into public.blueprints (id, player_id, program_id, coach_id, status) values
-  (tests.id('blueprintA'), tests.id('playerA'), tests.id('program1'), tests.id('coach1'), 'active');
+insert into public.blueprints (id, player_id, program_id, coach_id, status, start_date) values
+  (tests.id('blueprintA'), tests.id('playerA'), tests.id('program1'), tests.id('coach1'), 'active',
+   date_trunc('week', (now() at time zone 'America/New_York')::date)::date - 7);
 
 insert into public.progress_reports (id, player_id, program_id, author_id) values
   (tests.id('report'), tests.id('playerA'), tests.id('program1'), tests.id('coach1'));
@@ -491,7 +492,7 @@ select tests.clear_claims();
 select tests.as_user(tests.id('parentA'));
 select lives_ok(
   format($$insert into public.weekly_checkins (blueprint_id, player_id, week_start, assignment_completed, confidence)
-           values (%L, %L, '2026-10-05', true, 4)$$, tests.id('blueprintA'), tests.id('playerA')),
+           values (%L, %L, date_trunc('week', (now() at time zone 'America/New_York')::date)::date, true, 4)$$, tests.id('blueprintA'), tests.id('playerA')),
   'a parent can submit a weekly check-in for their player'
 );
 reset role;
@@ -505,7 +506,7 @@ select is(
 );
 select throws_ok(
   format($$insert into public.weekly_checkins (blueprint_id, player_id, week_start, assignment_completed, confidence)
-           values (%L, %L, '2026-10-12', true, 4)$$, tests.id('blueprintA'), tests.id('playerA')),
+           values (%L, %L, date_trunc('week', (now() at time zone 'America/New_York')::date)::date - 7, true, 4)$$, tests.id('blueprintA'), tests.id('playerA')),
   '42501', null,
   'a parent cannot submit a check-in for another family''s player'
 );

@@ -39,6 +39,7 @@ to stand in for the small part of Supabase the migrations use (the `auth.users` 
 | `..._foreign_key_indexes.sql`         | An index for every foreign key                                                                   |
 | `..._staff_management.sql`            | Account email copy for admins; promotion to coach creates the coach record                       |
 | `..._assigned_drill_visibility.sql`   | Families can read drills assigned in their visible Blueprints, even retired ones                 |
+| `..._checkins_and_reports.sql`        | Check-in week limits, check-ins locked once the Blueprint ends, report links must match player   |
 
 ## Tables
 
@@ -81,29 +82,29 @@ trigger. Ownership is recorded in `created_by` or an owner column (`parent_id`, 
 players with a non-withdrawn enrollment in a program the coach is assigned to (and the coach is active).
 Signed-out visitors have no access to any table. Anything not listed is denied.
 
-| Table                                         | Parent                                                               | Coach                                                           | Admin                        |
-| --------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------- |
-| `profiles`                                    | Read/edit own; read names of co-guardians and their players' coaches | Read/edit own; read guardians of coached players                | All (cannot change own role) |
-| `coaches`                                     | Read                                                                 | Read; edit own bio                                              | All                          |
-| `players`                                     | Read/edit their players; add players                                 | Read coached players                                            | All                          |
-| `parent_player_relationships`                 | Read links for their players                                         | Read links for coached players                                  | All                          |
-| `consent_records`                             | Read own; add (for own players)                                      | —                                                               | Read                         |
-| `programs`                                    | Read non-draft                                                       | Read non-draft and assigned drafts                              | All                          |
-| `program_coaches`                             | Read for visible programs                                            | Read for visible programs                                       | All                          |
-| `program_sessions`                            | Read for visible programs                                            | Read; update sessions of assigned programs                      | All                          |
-| `enrollments`                                 | Read their players'                                                  | Read for assigned programs                                      | All                          |
-| `attendance`                                  | Read their players'                                                  | Read/record/edit for assigned sessions and enrolled players     | All                          |
-| `assessment_templates`, `assessment_criteria` | Read                                                                 | Read                                                            | All                          |
-| `assessments`                                 | Read **published** for their players                                 | Read coached players'; create; edit drafts; submit own; approve | All; only admins publish     |
-| `assessment_scores`                           | Read with a visible assessment                                       | Write while the assessment is a draft (own assessments)         | Write drafts; delete         |
-| `drills`                                      | Read active drills                                                   | Read all                                                        | All                          |
-| `blueprints`                                  | Read **non-draft** for their players                                 | Read/create/edit for coached players; delete own drafts         | All                          |
-| `blueprint_priorities`, `blueprint_drills`    | Read with a visible Blueprint                                        | Write for coached players' Blueprints                           | All                          |
-| `weekly_checkins`                             | Read their players'; submit for an **active** Blueprint; edit own    | Read coached players'                                           | Read; delete                 |
-| `coach_notes`                                 | Read **parent-visible** notes for their players                      | Read all notes for coached players; write; edit/delete own      | All                          |
-| `progress_reports`                            | Read **published** for their players                                 | Same as assessments                                             | All; only admins publish     |
-| `audit_events`                                | —                                                                    | —                                                               | Read only                    |
-| `profile_emails`                              | Read own                                                             | Read own                                                        | Read all                     |
+| Table                                         | Parent                                                                 | Coach                                                           | Admin                        |
+| --------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------- |
+| `profiles`                                    | Read/edit own; read names of co-guardians and their players' coaches   | Read/edit own; read guardians of coached players                | All (cannot change own role) |
+| `coaches`                                     | Read                                                                   | Read; edit own bio                                              | All                          |
+| `players`                                     | Read/edit their players; add players                                   | Read coached players                                            | All                          |
+| `parent_player_relationships`                 | Read links for their players                                           | Read links for coached players                                  | All                          |
+| `consent_records`                             | Read own; add (for own players)                                        | —                                                               | Read                         |
+| `programs`                                    | Read non-draft                                                         | Read non-draft and assigned drafts                              | All                          |
+| `program_coaches`                             | Read for visible programs                                              | Read for visible programs                                       | All                          |
+| `program_sessions`                            | Read for visible programs                                              | Read; update sessions of assigned programs                      | All                          |
+| `enrollments`                                 | Read their players'                                                    | Read for assigned programs                                      | All                          |
+| `attendance`                                  | Read their players'                                                    | Read/record/edit for assigned sessions and enrolled players     | All                          |
+| `assessment_templates`, `assessment_criteria` | Read                                                                   | Read                                                            | All                          |
+| `assessments`                                 | Read **published** for their players                                   | Read coached players'; create; edit drafts; submit own; approve | All; only admins publish     |
+| `assessment_scores`                           | Read with a visible assessment                                         | Write while the assessment is a draft (own assessments)         | Write drafts; delete         |
+| `drills`                                      | Read active drills                                                     | Read all                                                        | All                          |
+| `blueprints`                                  | Read **non-draft** for their players                                   | Read/create/edit for coached players; delete own drafts         | All                          |
+| `blueprint_priorities`, `blueprint_drills`    | Read with a visible Blueprint                                          | Write for coached players' Blueprints                           | All                          |
+| `weekly_checkins`                             | Read their players'; submit/edit own while the Blueprint is **active** | Read coached players'                                           | Read; delete                 |
+| `coach_notes`                                 | Read **parent-visible** notes for their players                        | Read all notes for coached players; write; edit/delete own      | All                          |
+| `progress_reports`                            | Read **published** for their players                                   | Same as assessments                                             | All; only admins publish     |
+| `audit_events`                                | —                                                                      | —                                                               | Read only                    |
+| `profile_emails`                              | Read own                                                               | Read own                                                        | Read all                     |
 
 ### Roles
 
@@ -114,6 +115,11 @@ Signed-out visitors have no access to any table. Anything not listed is denied.
 - Promoting an account to coach or admin creates (or reactivates) its `coaches` row automatically.
 - Retired drills (`is_active = false`) disappear from the library for families, but a drill assigned in a
   Blueprint the family can see stays readable.
+- Check-ins are for the current week or an earlier one, never before the Blueprint's first week (weeks start
+  Monday, in PBP's time zone). The submitting guardian can edit a check-in only while its Blueprint is active.
+- A progress report's Blueprint and assessments must belong to the report's player. Report figures (rating
+  changes, attendance, check-in totals) are copied into the report when it is written, so a published report
+  never changes.
 - Sign-in emails live in `auth.users`, which the app cannot read. A trigger copies each email into
   `profile_emails`, readable only by the account itself and administrators, so coaches never see parents'
   email addresses.
@@ -165,6 +171,11 @@ parent; role changes are admin-only and audited; each family sees only its own p
 check-ins; coaches see only their rosters and lose access when a player withdraws; parents see only
 parent-visible notes and published assessments/reports; the full submit → approve → publish flow including
 who may do each step, locked content after submission, and audit entries.
+
+`04_assessments.test.sql` covers retired drills in Blueprints and the coach assessment flow.
+`05_checkins_reports.test.sql` covers check-in weeks, check-ins locked after a Blueprint ends, other families
+and draft Blueprints, report links, the observations rule, and report visibility before and after
+publication.
 
 ## Assumptions awaiting a product decision
 

@@ -222,6 +222,86 @@ export type BlueprintDrillRow = {
   sort_order: number;
 } & Timestamps;
 
+export type WeeklyCheckinRow = {
+  id: string;
+  blueprint_id: string;
+  player_id: string;
+  /** Monday of the week (YYYY-MM-DD). */
+  week_start: string;
+  assignment_completed: boolean;
+  reps_completed: number | null;
+  minutes_completed: number | null;
+  confidence: number;
+  reflection: string | null;
+  question_for_coach: string | null;
+  submitted_by: string;
+} & Timestamps;
+
+/** One category's baseline and current average, snapshotted into a report. */
+export type RatingChange = {
+  category: string;
+  baseline: number | null;
+  current: number | null;
+  change: number | null;
+};
+
+export type AttendanceSnapshot = {
+  present: number;
+  absent: number;
+  excused: number;
+  makeup: number;
+  total: number;
+};
+
+export type WorkSnapshot = {
+  weeksInPlan: number;
+  checkIns: number;
+  weeksCompleted: number;
+  totalReps: number;
+  totalMinutes: number;
+  averageConfidence: number | null;
+};
+
+export type ProgressReportRow = {
+  id: string;
+  player_id: string;
+  program_id: string | null;
+  blueprint_id: string | null;
+  baseline_assessment_id: string | null;
+  current_assessment_id: string | null;
+  author_id: string;
+  status: ReviewStatus;
+  rating_changes: RatingChange[];
+  attendance_summary: AttendanceSnapshot | Record<string, never>;
+  work_summary: WorkSnapshot | Record<string, never>;
+  coach_observations: string | null;
+  strengths: string | null;
+  next_priorities: string | null;
+  action_plan_30_day: string | null;
+  recommended_program_id: string | null;
+  submitted_at: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  published_by: string | null;
+  published_at: string | null;
+} & Timestamps;
+
+type ReportContent = Pick<
+  ProgressReportRow,
+  | "program_id"
+  | "blueprint_id"
+  | "baseline_assessment_id"
+  | "current_assessment_id"
+  | "rating_changes"
+  | "attendance_summary"
+  | "work_summary"
+  | "coach_observations"
+  | "strengths"
+  | "next_priorities"
+  | "action_plan_30_day"
+  | "recommended_program_id"
+>;
+
 type Relationship<Name extends string, Column extends string, Target extends string> = {
   foreignKeyName: Name;
   columns: [Column];
@@ -393,6 +473,39 @@ export type Database = {
             "weekly_reps_target" | "weekly_minutes_target" | "is_at_home" | "instructions" | "sort_order"
           >
         >;
+        Relationships: [];
+      };
+      weekly_checkins: {
+        Row: WeeklyCheckinRow;
+        Insert: Pick<
+          WeeklyCheckinRow,
+          "blueprint_id" | "player_id" | "week_start" | "assignment_completed" | "confidence"
+        > &
+          Partial<
+            Pick<
+              WeeklyCheckinRow,
+              "reps_completed" | "minutes_completed" | "reflection" | "question_for_coach"
+            >
+          >;
+        Update: Partial<
+          Pick<
+            WeeklyCheckinRow,
+            | "assignment_completed"
+            | "reps_completed"
+            | "minutes_completed"
+            | "confidence"
+            | "reflection"
+            | "question_for_coach"
+          >
+        >;
+        Relationships: [];
+      };
+      progress_reports: {
+        Row: ProgressReportRow;
+        Insert: Partial<Pick<ProgressReportRow, "id">> &
+          Pick<ProgressReportRow, "player_id"> &
+          Partial<ReportContent>;
+        Update: Partial<ReportContent & Pick<ProgressReportRow, "status">>;
         Relationships: [];
       };
       players: {

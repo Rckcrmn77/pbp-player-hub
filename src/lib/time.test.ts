@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addDays, dateKey, formatSessionTime, timeKey, zonedToUtc } from "./time";
+import { addDays, dateKey, formatSessionTime, formatWeek, timeKey, weekStart, zonedToUtc } from "./time";
 
 describe("zonedToUtc", () => {
   it("converts Eastern Daylight Time", () => {
@@ -36,5 +36,18 @@ describe("formatSessionTime", () => {
     expect(formatSessionTime("2026-10-05T21:00:00Z", "2026-10-05T22:30:00Z")).toBe(
       "Mon, Oct 5 · 5:00 PM – 6:30 PM",
     );
+  });
+});
+
+describe("weekStart and formatWeek", () => {
+  it("returns the Monday of the week", () => {
+    expect(weekStart("2026-10-05")).toBe("2026-10-05"); // Monday
+    expect(weekStart("2026-10-08")).toBe("2026-10-05"); // Thursday
+    expect(weekStart("2026-10-11")).toBe("2026-10-05"); // Sunday
+    expect(weekStart("2027-01-01")).toBe("2026-12-28"); // across a year
+  });
+
+  it("labels a week by its Monday", () => {
+    expect(formatWeek("2026-10-05")).toBe("Week of Oct 5, 2026");
   });
 });
