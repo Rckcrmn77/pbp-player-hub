@@ -17,6 +17,9 @@ export type CoachAssignmentRole = "lead" | "assistant";
 export type SessionStatus = "scheduled" | "cancelled" | "completed";
 export type EnrollmentStatus = "pending" | "active" | "waitlisted" | "withdrawn" | "completed";
 export type AttendanceStatus = "present" | "absent" | "excused" | "makeup";
+export type AssessmentType = "baseline" | "follow_up";
+export type ReviewStatus = "draft" | "submitted" | "approved" | "published";
+export type BlueprintStatus = "draft" | "active" | "completed" | "archived";
 
 type Timestamps = { created_at: string; updated_at: string };
 
@@ -124,6 +127,101 @@ export type AttendanceRow = {
   recorded_by: string | null;
 } & Timestamps;
 
+export type AssessmentTemplateRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  age_group: AgeGroup | null;
+  position: PlayerPosition | null;
+  version: number;
+  is_active: boolean;
+  created_by: string | null;
+} & Timestamps;
+
+export type AssessmentCriterionRow = {
+  id: string;
+  template_id: string;
+  category: string;
+  name: string;
+  description: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_by: string | null;
+} & Timestamps;
+
+export type AssessmentRow = {
+  id: string;
+  player_id: string;
+  program_id: string | null;
+  template_id: string;
+  coach_id: string;
+  assessment_type: AssessmentType;
+  status: ReviewStatus;
+  assessed_on: string;
+  summary: string | null;
+  submitted_at: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  published_by: string | null;
+  published_at: string | null;
+} & Timestamps;
+
+export type AssessmentScoreRow = {
+  id: string;
+  assessment_id: string;
+  criterion_id: string;
+  rating: number;
+  comment: string;
+} & Timestamps;
+
+export type DrillRow = {
+  id: string;
+  title: string;
+  description: string;
+  coaching_points: string | null;
+  positions: PlayerPosition[];
+  age_groups: AgeGroup[];
+  skill_category: string;
+  equipment: string | null;
+  target_reps: number | null;
+  target_minutes: number | null;
+  video_url: string | null;
+  is_active: boolean;
+  created_by: string | null;
+} & Timestamps;
+
+export type BlueprintRow = {
+  id: string;
+  player_id: string;
+  program_id: string | null;
+  baseline_assessment_id: string | null;
+  coach_id: string;
+  status: BlueprintStatus;
+  player_goals: string | null;
+  coach_summary: string | null;
+  start_date: string;
+  review_date: string | null;
+} & Timestamps;
+
+export type BlueprintPriorityRow = {
+  id: string;
+  blueprint_id: string;
+  rank: number;
+  title: string;
+  description: string | null;
+} & Timestamps;
+
+export type BlueprintDrillRow = {
+  id: string;
+  blueprint_id: string;
+  drill_id: string;
+  weekly_reps_target: number | null;
+  weekly_minutes_target: number | null;
+  is_at_home: boolean;
+  instructions: string | null;
+  sort_order: number;
+} & Timestamps;
+
 type Relationship<Name extends string, Column extends string, Target extends string> = {
   foreignKeyName: Name;
   columns: [Column];
@@ -198,6 +296,105 @@ export type Database = {
           Relationship<"attendance_player_id_fkey", "player_id", "players">,
         ];
       };
+      assessment_templates: {
+        Row: AssessmentTemplateRow;
+        Insert: Partial<Pick<AssessmentTemplateRow, "id">> &
+          Pick<AssessmentTemplateRow, "name"> &
+          Partial<
+            Pick<AssessmentTemplateRow, "description" | "age_group" | "position" | "version" | "is_active">
+          >;
+        Update: Partial<
+          Pick<
+            AssessmentTemplateRow,
+            "name" | "description" | "age_group" | "position" | "version" | "is_active"
+          >
+        >;
+        Relationships: [];
+      };
+      assessment_criteria: {
+        Row: AssessmentCriterionRow;
+        Insert: Pick<AssessmentCriterionRow, "template_id" | "category" | "name"> &
+          Partial<Pick<AssessmentCriterionRow, "description" | "sort_order" | "is_active">>;
+        Update: Partial<
+          Pick<AssessmentCriterionRow, "category" | "name" | "description" | "sort_order" | "is_active">
+        >;
+        Relationships: [
+          Relationship<"assessment_criteria_template_id_fkey", "template_id", "assessment_templates">,
+        ];
+      };
+      assessments: {
+        Row: AssessmentRow;
+        Insert: Partial<Pick<AssessmentRow, "id" | "program_id" | "assessed_on" | "summary">> &
+          Pick<AssessmentRow, "player_id" | "template_id" | "assessment_type">;
+        Update: Partial<Pick<AssessmentRow, "summary" | "assessed_on" | "status">>;
+        Relationships: [];
+      };
+      assessment_scores: {
+        Row: AssessmentScoreRow;
+        Insert: Pick<AssessmentScoreRow, "assessment_id" | "criterion_id" | "rating" | "comment">;
+        Update: Partial<Pick<AssessmentScoreRow, "rating" | "comment">>;
+        Relationships: [];
+      };
+      drills: {
+        Row: DrillRow;
+        Insert: Partial<Pick<DrillRow, "id">> & Editable<DrillRow>;
+        Update: Partial<Editable<DrillRow>>;
+        Relationships: [];
+      };
+      blueprints: {
+        Row: BlueprintRow;
+        Insert: Partial<
+          Pick<
+            BlueprintRow,
+            | "id"
+            | "program_id"
+            | "baseline_assessment_id"
+            | "status"
+            | "player_goals"
+            | "coach_summary"
+            | "start_date"
+            | "review_date"
+          >
+        > &
+          Pick<BlueprintRow, "player_id">;
+        Update: Partial<
+          Pick<
+            BlueprintRow,
+            | "status"
+            | "player_goals"
+            | "coach_summary"
+            | "start_date"
+            | "review_date"
+            | "program_id"
+            | "baseline_assessment_id"
+          >
+        >;
+        Relationships: [];
+      };
+      blueprint_priorities: {
+        Row: BlueprintPriorityRow;
+        Insert: Pick<BlueprintPriorityRow, "blueprint_id" | "rank" | "title"> &
+          Partial<Pick<BlueprintPriorityRow, "description">>;
+        Update: Partial<Pick<BlueprintPriorityRow, "rank" | "title" | "description">>;
+        Relationships: [];
+      };
+      blueprint_drills: {
+        Row: BlueprintDrillRow;
+        Insert: Pick<BlueprintDrillRow, "blueprint_id" | "drill_id"> &
+          Partial<
+            Pick<
+              BlueprintDrillRow,
+              "weekly_reps_target" | "weekly_minutes_target" | "is_at_home" | "instructions" | "sort_order"
+            >
+          >;
+        Update: Partial<
+          Pick<
+            BlueprintDrillRow,
+            "weekly_reps_target" | "weekly_minutes_target" | "is_at_home" | "instructions" | "sort_order"
+          >
+        >;
+        Relationships: [];
+      };
       players: {
         Row: PlayerRow;
         Insert: Partial<Pick<PlayerRow, "id">> & Omit<PlayerEditable, "id">;
@@ -241,6 +438,9 @@ export type Database = {
       session_status: SessionStatus;
       enrollment_status: EnrollmentStatus;
       attendance_status: AttendanceStatus;
+      assessment_type: AssessmentType;
+      review_status: ReviewStatus;
+      blueprint_status: BlueprintStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

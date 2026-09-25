@@ -7,27 +7,38 @@ const controlClass =
 
 type FieldProps = {
   name: string;
+  /** Defaults to `name`; set it when a page has several forms with the same field names. */
+  id?: string;
   label: string;
   hint?: ReactNode;
   errors?: string[];
   optional?: boolean;
 };
 
-function FieldShell({ name, label, hint, errors, optional, children }: FieldProps & { children: ReactNode }) {
+function FieldShell({
+  name,
+  id,
+  label,
+  hint,
+  errors,
+  optional,
+  children,
+}: FieldProps & { children: ReactNode }) {
+  const fieldId = id ?? name;
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium">
+      <label htmlFor={fieldId} className="block text-sm font-medium">
         {label}
         {optional && <span className="font-normal text-navy/60"> (optional)</span>}
       </label>
       {children}
       {hint && !errors?.length && (
-        <p id={`${name}-hint`} className="mt-1 text-sm text-navy/60">
+        <p id={`${fieldId}-hint`} className="mt-1 text-sm text-navy/60">
           {hint}
         </p>
       )}
       {errors?.length ? (
-        <p id={`${name}-error`} className="mt-1 text-sm font-medium text-orange-dark">
+        <p id={`${fieldId}-error`} className="mt-1 text-sm font-medium text-orange-dark">
           {errors[0]}
         </p>
       ) : null}
@@ -42,6 +53,7 @@ function describedBy(name: string, hint: unknown, errors?: string[]) {
 
 export function TextField({
   name,
+  id,
   label,
   hint,
   errors,
@@ -49,13 +61,13 @@ export function TextField({
   ...input
 }: FieldProps & Omit<InputHTMLAttributes<HTMLInputElement>, "name">) {
   return (
-    <FieldShell name={name} label={label} hint={hint} errors={errors} optional={optional}>
+    <FieldShell name={name} id={id} label={label} hint={hint} errors={errors} optional={optional}>
       <input
-        id={name}
+        id={id ?? name}
         name={name}
         required={!optional}
         aria-invalid={errors?.length ? true : undefined}
-        aria-describedby={describedBy(name, hint, errors)}
+        aria-describedby={describedBy(id ?? name, hint, errors)}
         className={controlClass}
         {...input}
       />
@@ -65,6 +77,7 @@ export function TextField({
 
 export function TextAreaField({
   name,
+  id,
   label,
   hint,
   errors,
@@ -72,14 +85,14 @@ export function TextAreaField({
   ...input
 }: FieldProps & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "name">) {
   return (
-    <FieldShell name={name} label={label} hint={hint} errors={errors} optional={optional}>
+    <FieldShell name={name} id={id} label={label} hint={hint} errors={errors} optional={optional}>
       <textarea
-        id={name}
+        id={id ?? name}
         name={name}
         rows={3}
         required={!optional}
         aria-invalid={errors?.length ? true : undefined}
-        aria-describedby={describedBy(name, hint, errors)}
+        aria-describedby={describedBy(id ?? name, hint, errors)}
         className={controlClass}
         {...input}
       />
@@ -89,6 +102,7 @@ export function TextAreaField({
 
 export function SelectField({
   name,
+  id,
   label,
   hint,
   errors,
@@ -102,16 +116,16 @@ export function SelectField({
     placeholder?: string;
   }) {
   return (
-    <FieldShell name={name} label={label} hint={hint} errors={errors} optional={optional}>
+    <FieldShell name={name} id={id} label={label} hint={hint} errors={errors} optional={optional}>
       <select
         // Remount when the default changes (e.g. values returned after a failed submit):
         // React only applies a select's default choice on mount, and forms reset to it.
         key={String(select.defaultValue ?? "")}
-        id={name}
+        id={id ?? name}
         name={name}
         required={!optional}
         aria-invalid={errors?.length ? true : undefined}
-        aria-describedby={describedBy(name, hint, errors)}
+        aria-describedby={describedBy(id ?? name, hint, errors)}
         className={controlClass}
         {...select}
       >

@@ -6,15 +6,17 @@ _Prepare. Develop. Compete._
 The product scope, roles, and safety requirements are defined in [`PROJECT_CHARTER.md`](./PROJECT_CHARTER.md),
 which is the source of truth for what gets built.
 
-## Current status: Sprint 2 (programs and coach workflow)
+## Current status: Sprint 3 (assessments and Blueprints)
 
-- **Parents**: sign-up with email confirmation, sign-in by password or emailed link, dashboard, player
-  profiles, consent, upcoming sessions, attendance summary, and programs open for registration
-- **Admins**: programs, weekly session scheduling, coach assignments, rosters, and roles (People page)
-- **Coaches**: today's and upcoming sessions, rosters, and attendance entry
+- **Parents**: sign-up and sign-in, dashboard, player profiles, consent, upcoming sessions, attendance,
+  programs open for registration, published assessments, and the player's current Blueprint
+- **Admins**: programs, sessions, coach assignments, rosters, roles, assessment templates and criteria,
+  the drill library, and publishing approved assessments to families
+- **Coaches**: sessions, rosters, attendance, baseline and follow-up assessments (1–5 ratings with required
+  comments), approval queue, and Blueprints with up to three priorities and assigned drills
 - Database with Row Level Security on every table ([`docs/database.md`](./docs/database.md))
-- **All legal wording is placeholder text marked for review.** Assessments, Blueprints, check-ins, and
-  reports come in Sprints 3–4.
+- **All legal wording is placeholder text marked for review.** Weekly check-ins and progress reports come in
+  Sprint 4.
 
 ## Requirements
 
@@ -97,7 +99,7 @@ src/
   config/              brand copy and navigation, legal document versions, player options
   lib/                 auth/session checks, Server Actions, Supabase clients, validation, consent logic
   proxy.ts             session refresh and early sign-in redirects
-e2e/                   Playwright smoke tests, parent journey, and staff journey (need local Supabase)
+e2e/                   Playwright smoke tests and parent, staff, and assessment journeys (need local Supabase)
 supabase/
   config.toml          local Supabase settings (local development only)
   migrations/          versioned SQL migrations, applied in filename order
@@ -134,7 +136,7 @@ The app reads only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE
 GitHub Actions (`.github/workflows/ci.yml`) runs on every pull request and on pushes to `main`:
 format check, lint, typecheck, unit tests, the Playwright smoke tests, the database tests, and the full
 parent and staff journeys (sign-up, email confirmation, players, consent, sign-in, password reset; programs,
-sessions, coach assignment, rosters, attendance) against a local Supabase stack started in Docker on the
+sessions, coach assignment, rosters, attendance; assessments, approval, publishing, Blueprints) against a local Supabase stack started in Docker on the
 runner.
 
 ## Contributing

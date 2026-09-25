@@ -6,6 +6,7 @@ import { PlayerCard } from "@/components/parent/player-card";
 import { getSessionUser } from "@/lib/auth/session";
 import { consentStatus } from "@/lib/consent";
 import {
+  getActiveBlueprintSummaries,
   getMyConsentRecords,
   getMyPlayerPrograms,
   getMyPlayers,
@@ -16,16 +17,17 @@ import { formatDate, formatSessionTime } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Parent dashboard" };
 
-const comingLater = ["Current Blueprint", "Weekly assignments", "Check-in status", "Latest progress report"];
+const comingLater = ["Weekly check-ins", "Latest progress report"];
 
 export default async function ParentDashboardPage({ searchParams }: PageProps<"/parent">) {
-  const [{ notice }, user, players, consents, playerPrograms, openPrograms] = await Promise.all([
+  const [{ notice }, user, players, consents, playerPrograms, openPrograms, blueprints] = await Promise.all([
     searchParams,
     getSessionUser(),
     getMyPlayers(),
     getMyConsentRecords(),
     getMyPlayerPrograms(),
     getOpenPrograms(),
+    getActiveBlueprintSummaries(),
   ]);
   const upcoming = await getMyUpcomingSessions(players, playerPrograms);
   const firstName = user?.profile.first_name;
@@ -76,6 +78,7 @@ export default async function ParentDashboardPage({ searchParams }: PageProps<"/
                   player={player}
                   consent={consentStatus(consents, "parental_consent", player.id).status}
                   programs={playerPrograms.filter((p) => p.playerId === player.id)}
+                  blueprint={blueprints.find((b) => b.playerId === player.id)}
                 />
               </li>
             ))}
